@@ -4,9 +4,9 @@
 
 本插件使用简单方便，扩展性强，它拥有如下特点：
 
-1、各个支付平台继承使用interface接口规范
+1、各支付平台的类都继承使用interface接口规范，保证整个支付模块工作统一规范
 
-2、使用工厂服务调度工作，可以方便的切换调用各个支付平台
+2、使用工厂服务调度，可以方便的切换调用各个支付平台驱动
 
 3、通过工厂服务可以一次调用出所有支持的支付平台的app参数
 
@@ -15,8 +15,8 @@
 ### 使用示例
 ```
 // 生成全部app需要的参数
-Factory::getAppsParam($sets, $orderSn, $money, $title);
+\xing\payment\drive\Factory::getAppsParam($sets, $orderSn, $money, $title);
 // 生成支付宝app需要的参数
-Factory::getInstance('aliPay')->init($set)->set($orderSn, $money, $title)->getSign();
+\xing\payment\drive\Factory::getInstance('aliPay')->init($set)->set($orderSn, $money, $title)->getSign();
 ```
 
