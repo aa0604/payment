@@ -39,7 +39,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $class->notifyUrl = $config['notifyUrl'];
 
 //        初始化支付宝和配置参数
-        $class->AopClient = new \xing\payment\sdk\aliPay\aop\AopClient;
+        $class->AopClient = new \xing\payment\sdk\aliPay\aop\AopClient();
         $class->AopClient->appId = $config['appId'];
         $class->AopClient->rsaPrivateKey = $config['rsaPrivateKey'];  // 请填写开发者私钥去头去尾去回车，一行字符串
         $class->AopClient->alipayrsaPublicKey = $config['alipayrsaPublicKey']; // 请填写支付宝公钥，一行字符串
@@ -56,9 +56,10 @@ class AliPay implements \xing\payment\core\PayInterface
      * @param $amount
      * @param string $title
      * @param string $body
+     * @param string $intOrderSn 第三方支付平台生成的订单号，如支付宝支付时返回的支付宝交易号，不是每个平台都需要
      * @return $this
      */
-    public function set($outOrderSn, $amount, $title = '', $body = '')
+    public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
         $this->params['out_trade_no'] = $outOrderSn;
         $this->params['body'] = $body;
@@ -86,7 +87,7 @@ class AliPay implements \xing\payment\core\PayInterface
     {
         $request = new \xing\payment\sdk\aliPay\aop\request\AlipayTradeAppPayRequest();
         $request->setNotifyUrl($this->notifyUrl);
-        $request->setBizContent($this->params);
+        $request->setBizContent(json_encode($this->params));
         $response = $this->AopClient->sdkExecute($request);
         return htmlspecialchars($response);
     }
