@@ -1,0 +1,18 @@
+{
+    "name": "xing.chen/payment",
+    "license": "mit",
+    "authors": [
+        {
+            "name": "chen xing",
+            "email": "877349686@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "xing\\payment\\": ""
+        }
+    }
+}
