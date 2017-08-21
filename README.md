@@ -15,10 +15,10 @@
 ### 使用示例
 ```
 // 生成全部app需要的参数
-\xing\payment\drive\Factory::getAppsParam($sets, $orderSn, $money, $title);
+\xing\payment\drive\PayFactory::getAppsParam($sets, $orderSn, $money, $title);
 
 // 生成支付宝app需要的参数
-\xing\payment\drive\Factory::getInstance('aliPay')
+\xing\payment\drive\PayFactory::getInstance('aliPay')
   ->init($set)
   ->set($orderSn, $money, $title)
   ->getSign();
