@@ -10,7 +10,7 @@ namespace xing\payment\drive;
 
 
 
-class Factory
+class PayFactory
 {
     private static $payDrive = [
         'aliPay' => "\\xing\\payment\\drive\\AliPay",
@@ -46,7 +46,7 @@ class Factory
             $return[$name] = static::getInstance($name)
                 ->init($sets[$name])
                 ->set($outOrderSn, $amount, $title, $body, $intOrderSn)
-                ->getSign();
+                ->getAppParam();
         }
         return $return;
     }

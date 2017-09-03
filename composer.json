@@ -1,5 +1,6 @@
 {
     "name": "xing.chen/payment",
+    "description": "支付第三方类库，支付支付宝、微信，版本新",
     "license": "mit",
     "authors": [
         {

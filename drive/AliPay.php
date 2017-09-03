@@ -17,6 +17,7 @@ class AliPay implements \xing\payment\core\PayInterface
 {
 
     public $notifyUrl = '通过设置 init 方法的参数$config[notifyUrl] 来设置';
+    public $returnUrl = '同上，可空';
 
     private $config;
 
@@ -37,17 +38,29 @@ class AliPay implements \xing\payment\core\PayInterface
         $class = new self();
         $class->config = $config;
         $class->notifyUrl = $config['notifyUrl'];
+        $class->returnUrl = $config['returnUrl'] ?? '';
 
 //        初始化支付宝和配置参数
-        $class->AopClient = new \xing\payment\sdk\aliPay\aop\AopClient();
-        $class->AopClient->appId = $config['appId'];
-        $class->AopClient->rsaPrivateKey = $config['rsaPrivateKey'];  // 请填写开发者私钥去头去尾去回车，一行字符串
-        $class->AopClient->alipayrsaPublicKey = $config['alipayrsaPublicKey']; // 请填写支付宝公钥，一行字符串
-        $class->AopClient->signType = $config['signType'] ?? 'RSA2';  // 签名方式
-        $class->AopClient->format = $config['format'] ?? 'json';
-        $class->AopClient->format = $config['charset'] ?? 'UTF-8';
+//        $class->AopClient = $class->getAopClient();
 //        返回本类自身
         return $class;
+    }
+
+    /**
+     * @return \xing\payment\sdk\aliPay\aop\AopClient
+     */
+    private function getAopClient()
+    {
+        $config = & $this->config;
+        $aopClient = new \xing\payment\sdk\aliPay\aop\AopClient();
+        $aopClient->appId = $config['appId'];
+        $aopClient->rsaPrivateKey = $config['rsaPrivateKey'];  // 请填写开发者私钥去头去尾去回车，一行字符串
+        $aopClient->alipayrsaPublicKey = $config['alipayrsaPublicKey']; // 请填写支付宝公钥，一行字符串
+        $aopClient->signType = $config['signType'] ?? 'RSA2';  // 签名方式
+        $aopClient->format = $config['format'] ?? 'JSON';
+        $aopClient->charset = $config['charset'] ?? 'utf-8';
+
+        return $aopClient;
     }
 
     /**
@@ -75,20 +88,54 @@ class AliPay implements \xing\payment\core\PayInterface
         return $this;
     }
 
-    public function fineSet()
-    {
-
-    }
 
     /**
      * @return string
      */
-    public function getSign()
+    public function getAppParam()
     {
         $request = new \xing\payment\sdk\aliPay\aop\request\AlipayTradeAppPayRequest();
         $request->setNotifyUrl($this->notifyUrl);
-        $request->setBizContent(json_encode($this->params));
-        $response = $this->AopClient->sdkExecute($request);
-        return htmlspecialchars($response);
+        $request->setBizContent(json_encode($this->params, JSON_UNESCAPED_UNICODE));
+        return $response = $this->getAopClient()->sdkExecute($request);
+    }
+
+    public function autoActionFrom()
+    {
+        $payRequestBuilder = new \xing\payment\sdk\aliPay\wappay\buildermodel\AlipayTradeWapPayContentBuilder();
+        $payRequestBuilder->setBody($this->params['body']);
+        $payRequestBuilder->setSubject($this->params['subject']);
+        $payRequestBuilder->setOutTradeNo($this->params['out_trade_no']);
+        $payRequestBuilder->setTotalAmount($this->params['total_amount']);
+        $payRequestBuilder->setTimeExpress($this->params['timeout_express']);
+
+        # 将参数转换为 支付宝 sdk 的参数
+        $config = [
+            'app_id' => $this->config['appId'],
+            'merchant_private_key' => $this->config['rsaPrivateKey'],
+            //异步通知地址
+            'notify_url' => $this->notifyUrl,
+            //同步跳转
+            'return_url' => $this->returnUrl,
+            'charset' => $this->config['charset'] ?? 'UTF-8',
+            'sign_type' => $this->config['signType'] ?? 'RSA2',
+            'gatewayUrl' => "https://openapi.alipay.com/gateway.do",
+            //支付宝公钥,查看地址：https://openhome.alipay.com/platform/keyManage.htm 对应APPID下的支付宝公钥。
+            'alipay_public_key' => $this->config['alipayrsaPublicKey'],
+        ];
+
+        $payResponse = new \xing\payment\sdk\aliPay\wappay\service\AlipayTradeService($config);
+        $payResponse->wapPay($payRequestBuilder, $config['return_url'],$config['notify_url']);
+        exit();
+    }
+
+    /**
+     * 验签
+     * @param null $post
+     * @return bool
+     */
+    public function validate($post = null)
+    {
+        return $this->getAopClient()->rsaCheckV1($post, NULL, "RSA");
     }
 }

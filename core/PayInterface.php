@@ -39,6 +39,9 @@ interface PayInterface
      * 返回签名
      * @return mixed
      */
-    public function getSign();
+    public function getAppParam();
 
+    public function autoActionFrom();
+
+    public function validate($post = null);
 }

@@ -5,6 +5,9 @@
  * @author auto create
  * @since 1.0, 2017-08-16 17:01:42
  */
+
+namespace xing\payment\sdk\aliPay\aop\request;
+
 class AlipayTradeWapPayRequest
 {
 	/** 
