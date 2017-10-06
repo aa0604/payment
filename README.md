@@ -14,6 +14,7 @@
 
 ## 注意
 1、本插件在正式项目中使用，按需求开发和更新
+
 2、暂时只支持app支付（支付宝闲着没事做弄了 web跳转支付）
 
 ### 使用说明
@@ -70,12 +71,6 @@ class PaymentSetMap
 2、调用设置，使用工厂切换支付驱动，如：PayFactory::getInstance('aliPay')
 ### 使用示例
 ```
-
-$paySet = PaymentSetMap::getPayments();
-// 生成全部app需要的参数（数组）
-$payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
-
- 
 // 生成支付宝app需要的参数
 $payName = 'aliPay';
 $set = PaymentSetMap::getSet($payName);
@@ -83,11 +78,24 @@ $set = PaymentSetMap::getSet($payName);
   ->init($set)
   ->set('订单号', '金额', '支付标题（商品名）')
   ->getSign();
+  
+// 生成微信app需要的参数
+$payName = 'weChatPay';
+$set = PaymentSetMap::getSet($payName);
+\xing\payment\drive\PayFactory::getInstance($payName)
+  ->init($set)
+  ->set('订单号', '金额', '支付标题（商品名）')
+  ->getSign();
+ 
+// 生成app所有支付方式需要的参数（数组）
+$paySet = PaymentSetMap::getPayments();
+$payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
+
 ```
 
 ### 异步通知回调示例
 ```$xslt
-# 阿里异步通知
+# 支付宝异步通知
 try {
     $payName = 'aliPay';
     $set = PaymentSetMap::getSet($payName);
@@ -96,4 +104,6 @@ try {
 } catch (\Exception $e) {
     exit($e->getMessage());
 }
+
+# 微信回调通知可参考支付宝异步通知
 ```
