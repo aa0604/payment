@@ -19,7 +19,7 @@
 
 ### 使用说明
 1、将配置保存到PHP文件中，如:
-```$xslt
+```php
 namespace common\map;
 
 class PaymentSetMap
@@ -70,11 +70,11 @@ class PaymentSetMap
 ```
 2、调用设置，使用工厂切换支付驱动，如：PayFactory::getInstance('aliPay')
 ### 使用示例
-```
+```php
 // 生成支付宝app需要的参数
 $payName = 'aliPay';
 $set = PaymentSetMap::getSet($payName);
-\xing\payment\drive\PayFactory::getInstance($payName)
+$sign = \xing\payment\drive\PayFactory::getInstance($payName)
   ->init($set)
   ->set('订单号', '金额', '支付标题（商品名）')
   ->getSign();
@@ -82,7 +82,7 @@ $set = PaymentSetMap::getSet($payName);
 // 生成微信app需要的参数
 $payName = 'weChatPay';
 $set = PaymentSetMap::getSet($payName);
-\xing\payment\drive\PayFactory::getInstance($payName)
+$sign = \xing\payment\drive\PayFactory::getInstance($payName)
   ->init($set)
   ->set('订单号', '金额', '支付标题（商品名）')
   ->getSign();
@@ -94,7 +94,7 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', 
 ```
 
 ### 异步通知回调示例
-```$xslt
+```php
 # 支付宝异步通知
 try {
     $payName = 'aliPay';
