@@ -1,6 +1,6 @@
 {
     "name": "xing.chen/payment",
-    "description": "支付第三方类库，支付支付宝、微信，版本新",
+    "description": "支付第三方类库，支持：支付宝、微信、payPal、俄罗斯qiwi（正在开发）",
     "license": "mit",
     "authors": [
         {
@@ -9,7 +9,8 @@
         }
     ],
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=7.0.0",
+        "paypal/rest-api-sdk-php": "^1.12"
     },
     "autoload": {
         "psr-4": {

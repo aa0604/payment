@@ -13,8 +13,8 @@ namespace xing\payment\drive;
 class PayFactory
 {
     private static $payDrive = [
-        'aliPay' => '\xing\payment\drive\AliPay',
-        'weChatPay' => '\xing\payment\drive\WeChatPay',
+        'aliPay' => "\\xing\\payment\\drive\\AliPay",
+        'weChatPay' => "\\xing\\payment\\drive\\WeChatPay",
     ];
 
     /**

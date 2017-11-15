@@ -1,5 +1,5 @@
 # payment
-支付插件 支持支付宝和微信
+支付插件 支持：支付宝、微信、payPal、俄罗斯qiwi（正在开发）
 ## 插件介绍
 
 本插件使用简单方便，扩展性强，它拥有如下特点：
@@ -20,6 +20,7 @@
 ### 使用说明
 1、将配置保存到PHP文件中，如:
 ```php
+<?php
 namespace common\map;
 
 class PaymentSetMap
@@ -45,6 +46,13 @@ class PaymentSetMap
             'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
             'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
         ],
+        
+    'payPal' => [
+        'clientId' => '商家id',
+        'clientSecret' => 'Secret',
+        // 钩子id 到paypal后台增加webhook
+        'WebhookID' => 'xxxxxxxxx'
+        ]
     ];
 
 
@@ -67,10 +75,13 @@ class PaymentSetMap
         return self::$set;
     }
 }
+?>
 ```
-2、调用设置，使用工厂切换支付驱动，如：PayFactory::getInstance('aliPay')
-### 使用示例
+2、调用设置，使用工厂切换支付驱动，如：PayFactory::getInstance('aliPay')或直接使用类 \xing\payment\drive\AliPay::init($set)->validate();
+### 支付宝、微信使用示例
 ```php
+<?php
+
 // 生成支付宝app需要的参数
 $payName = 'aliPay';
 $set = PaymentSetMap::getSet($payName);
@@ -106,4 +117,18 @@ try {
 }
 
 # 微信回调通知可参考支付宝异步通知
+```
+
+### paypal 使用示例
+#### Notify
+```php
+<?php
+$requestBody = file_get_contents('php://input');
+try {
+    $bool = \xing\payment\drive\PayPal::init($config)->validate($requestBody);
+    if (!$bool) throw new \Exception('验证失败');
+    // 验证通过，订单业务代码.....
+} catch (\Exception $e) {
+    exit($e->getMessage());
+}
 ```
