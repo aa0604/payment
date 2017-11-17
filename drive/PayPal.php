@@ -28,6 +28,9 @@ class PayPal implements \xing\payment\core\PayInterface
     // 网关
     private $gateway;
 
+    // 沙箱模式开关
+    private $sandbox = false;
+
     /**
      * @param $config
      * @return PayPal
@@ -120,48 +123,26 @@ class PayPal implements \xing\payment\core\PayInterface
     }
 
     /**
+     * 设置沙箱模式
+     * @param bool $switch
+     * @return $this
+     */
+    public function sandbox($switch = true)
+    {
+        $this->sandbox = $switch;
+        return $this;
+    }
+    /**
      * 验证返回信息
      * @param null $requestBody
      * @return bool
      */
     public function validate($requestBody = null)
     {
-        $headers = array (
-            'Client-Pid' => '14910',
-            'Cal-Poolstack' => 'amqunphttpdeliveryd:UNPHTTPDELIVERY*CalThreadId=0*TopLevelTxnStartTime=1579e71daf8*Host=slcsbamqunphttpdeliveryd3001',
-            'Correlation-Id' => '958be65120106',
-            'Host' => 'shiparound-dev.de',
-            'User-Agent' => 'PayPal/AUHD-208.0-25552773',
-            'Paypal-Auth-Algo' => 'SHA256withRSA',
-            'Paypal-Cert-Url' => 'https://api.sandbox.paypal.com/v1/notifications/certs/CERT-360caa42-fca2a594-a5cafa77',
-            'Paypal-Auth-Version' => 'v2',
-            'Paypal-Transmission-Sig' => 'eDOnWUj9FXOnr2naQnrdL7bhgejVSTwRbwbJ0kuk5wAtm2ZYkr7w5BSUDO7e5ZOsqLwN3sPn3RV85Jd9pjHuTlpuXDLYk+l5qiViPbaaC0tLV+8C/zbDjg2WCfvtf2NmFT8CHgPPQAByUqiiTY+RJZPPQC5np7j7WuxcegsJLeWStRAofsDLiSKrzYV3CKZYtNoNnRvYmSFMkYp/5vk4xGcQLeYNV1CC2PyqraZj8HGG6Y+KV4trhreV9VZDn+rPtLDZTbzUohie1LpEy31k2dg+1szpWaGYOz+MRb40U04oD7fD69vghCrDTYs5AsuFM2+WZtsMDmYGI0pxLjn2yw==',
-            'Paypal-Transmission-Time' => '2016-09-21T22:00:46Z',
-            'Paypal-Transmission-Id' => 'd938e770-8046-11e6-8103-6b62a8a99ac4',
-            'Accept' => '*/*',
-        );
-        $headers = getallheaders();
-        $headers = array_change_key_case($headers, CASE_UPPER);
 
-        $signatureVerification = new \PayPal\Api\VerifyWebhookSignature();
-        $signatureVerification->setWebhookId($this->config['WebhookID']); // Note that the Webhook ID must be a currently valid Webhook that you created with your client ID/secret.
-        $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
-        $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
-        $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
-        $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
-        $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
-
-        $signatureVerification->setRequestBody($requestBody);
-        $request = clone $signatureVerification;
-        try {
-            $output = $signatureVerification->post($this->apiContext);
-            $this->response = $output->getVerificationStatus();
-        } catch (\Exception $e) {
-//            throw $e;
-            $this->response = $e->getMessage();
-            return false;
-        }
-        return true;
+        $ipn = new \xing\payment\sdk\payPal\PaypalIPN();
+        if($this->sandbox) $ipn->useSandbox();
+        return $ipn->verifyIPN();
     }
 
     /**
