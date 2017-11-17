@@ -25,6 +25,9 @@ class PayPal implements \xing\payment\core\PayInterface
 
     private $config;
 
+    // 网关
+    private $gateway;
+
     /**
      * @param $config
      * @return PayPal
@@ -42,8 +45,7 @@ class PayPal implements \xing\payment\core\PayInterface
             throw new \Exception('PayPal Secret 未设置');
 
         $class->apiContext = new \PayPal\Rest\ApiContext(
-            new \PayPal\Auth\OAuthTokenCredential($config['clientId'], $config['clientSecret']
-            )
+            new \PayPal\Auth\OAuthTokenCredential($config['clientId'], $config['clientSecret'])
         );
         return $class;
     }
@@ -162,6 +164,24 @@ class PayPal implements \xing\payment\core\PayInterface
         return true;
     }
 
+    /**
+     * 生成客户端令牌
+     * @return string
+     */
+    public function createClientToken()
+    {
+        return $this->getGateway()->clientToken()->generate();
+    }
+    /**
+     * 获取网关
+     * @return \Braintree_Gateway
+     */
+    public function getGateway()
+    {
+        if (empty($this->gateway))
+            $this->gateway = new \Braintree_Gateway(['accessToken' => $this->config['accessToken']]);
+        return $this->gateway;
+    }
 }
 
 /**
