@@ -9,7 +9,6 @@
 namespace xing\payment\drive;
 
 
-use yii\db\Exception;
 
 /**
  * @property ['clientId' => '','clientSecret' => '', 'WebhookID' => ''] $config
