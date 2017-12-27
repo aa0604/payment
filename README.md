@@ -67,17 +67,24 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', 
 
 ### 异步通知回调示例
 ```php
+<?php
 # 支付宝异步通知
 try {
     $payName = 'aliPay';
-    $set = PaymentSetMap::getSet($payName);
-    $r = PayFactory::getInstance($payName)->init($set)->validate($_POST);
+    $r = \xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST);
     exit($r ? 'success' : $r);
 } catch (\Exception $e) {
     exit($e->getMessage());
 }
 
-# 微信回调通知可参考支付宝异步通知
+# 微信回调通知
+try {
+    $payName = 'weChatPay';
+    $r = \xing\payment\drive\PayFactory::getInstance($payName)->init($wechatConfig)->validate($_POST);
+    exit($r ? 'success' : $r);
+} catch (\Exception $e) {
+    exit($e->getMessage());
+}
 ```
 
 # paypal
