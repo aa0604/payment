@@ -69,22 +69,15 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', 
 ```php
 <?php
 # 支付宝异步通知
-try {
-    $payName = 'aliPay';
-    $r = \xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST);
-    exit($r ? 'success' : $r);
-} catch (\Exception $e) {
-    exit($e->getMessage());
-}
+
+$payName = 'aliPay';
+$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST);
+exit($r ? 'success' : $r);
 
 # 微信回调通知
-try {
-    $payName = 'weChatPay';
-    $r = \xing\payment\drive\PayFactory::getInstance($payName)->init($wechatConfig)->validate($_POST);
-    exit($r ? 'success' : $r);
-} catch (\Exception $e) {
-    exit($e->getMessage());
-}
+$payName = 'weChatPay';
+$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($wechatConfig)->validate($_POST);
+exit($r ? 'success' : $r);
 ```
 
 # paypal
@@ -124,7 +117,6 @@ try {
 }
 catch(\Exception $e)
 {
-    Yii::error($e->getMessage(), __METHOD__);
-    return $this->error($e->getMessage(), $e->getCode());
+    exit($e->getMessage());
 }
 ```
