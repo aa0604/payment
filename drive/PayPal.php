@@ -111,6 +111,10 @@ class PayPal implements \xing\payment\core\PayInterface
     {
 
     }
+    public function customParams($value)
+    {
+
+    }
     public function getAppParam()
     {
 

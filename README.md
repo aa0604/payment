@@ -96,6 +96,7 @@ $set = PaymentSetMap::getSet($payName);
 $sign = \xing\payment\drive\PayFactory::getInstance($payName)
   ->init($set)
   ->set('订单号', '金额', '支付标题（商品名）')
+  ->customParams('自定义参数值')
   ->getSign();
  
 // 生成app所有支付方式需要的参数（数组）

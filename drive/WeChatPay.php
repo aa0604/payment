@@ -58,6 +58,15 @@ class WeChatPay implements \xing\payment\core\PayInterface
         return $this;
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function customParams($value)
+    {
+        $this->payObject->SetAttach($value);
+        return $this;
+    }
     public function getAppParam()
     {
         $return = WxPayApi::unifiedOrder($this->payObject, 15);

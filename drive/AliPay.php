@@ -88,6 +88,15 @@ class AliPay implements \xing\payment\core\PayInterface
         return $this;
     }
 
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function customParams($value)
+    {
+        $this->params['passback_params'] = urlencode($value);
+        return $this;
+    }
 
     /**
      * @return string

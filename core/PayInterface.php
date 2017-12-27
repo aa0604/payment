@@ -24,16 +24,23 @@ interface PayInterface
      * @param string $title
      * @param string $body
      * @param string $intOrderSn 第三方支付平台生成的订单号，如支付宝支付时返回的支付宝交易号，不是每个平台都需要
-     * @return mixed
+     * @return $this
      */
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '');
 
     /**
      * 设置其他参数
      * @param $params
-     * @return mixed
+     * @return $this
      */
     public function params(array $params);
+
+    /**
+     *
+     * @param $value
+     * @return $this
+     */
+    public function customParams($value);
 
     /**
      * 返回签名
