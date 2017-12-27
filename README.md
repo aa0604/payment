@@ -37,7 +37,7 @@ $aliConfig = [
 $sign = \xing\payment\drive\PayFactory::getInstance('aliPay')
   ->init($aliConfig)
   ->set('订单号', '金额', '支付标题（商品名）')
-  ->customParams('自定义参数值')
+//  ->customParams('自定义参数值，需要请取消注释')
   ->getSign();
   
 // 生成微信app需要的参数
@@ -54,7 +54,7 @@ $set = PaymentSetMap::getSet($payName);
 $sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
   ->init($set)
   ->set('订单号', '金额', '支付标题（商品名）')
-  ->customParams('自定义参数值')
+//  ->customParams('自定义参数值，需要请取消注释')
   ->getSign();
  
 // 配置数组：注意键名为相应正确的支付驱动英文名
