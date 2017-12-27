@@ -18,90 +18,50 @@ composer require xing.chen/payment dev-master
 ## 注意
 1、本插件在正式项目中使用，按需求开发和更新
 
-2、暂时只支持app支付（支付宝闲着没事做弄了 web跳转支付）
+2、只支持app支付参数生成和异步通知
 
-### 使用说明
-1、将配置保存到PHP文件中，如:
-```php
-<?php
-namespace common\map;
-
-class PaymentSetMap
-{
-
-    public static $set = [
-        'aliPay' => [
-            'title' => '支付宝支付',
-            'appId' => '支付宝appId',
-            'notifyUrl' => '异步通知 url',
-
-            'alipayrsaPublicKey' => '支付宝公钥（字符串），详情请查看支付宝生成公钥的文档',
-
-            'rsaPrivateKey' => '支付宝私钥（字符串），详情请查看支付宝生成私钥的文档',
-        ],
-
-        'weChatPay' => [
-            'title' => '微信支付',
-            'appId' => '微信支付appId',
-            'mchId' => '商户id',
-            'notifyUrl' => '异步通知 url',
-            // 证书地址
-            'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
-            'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
-        ],
-        
-    'payPal' => [
-        'clientId' => '商家id',
-        'clientSecret' => 'Secret',
-        ]
-    ];
-
-
-    /**
-     * 读取某个支付设置
-     * @param $name
-     * @return mixed
-     */
-    public static function getSet($name)
-    {
-        return static::$set[$name];
-    }
-
-    /**
-     * 读取所有支付设置
-     * @return array
-     */
-    public static function getPayments()
-    {
-        return self::$set;
-    }
-}
-?>
-```
-2、调用设置，使用工厂切换支付驱动，如：PayFactory::getInstance('aliPay')或直接使用类 \xing\payment\drive\AliPay::init($set)->validate();
 ### 支付宝、微信使用示例
 ```php
 <?php
 
 // 生成支付宝app需要的参数
-$payName = 'aliPay';
-$set = PaymentSetMap::getSet($payName);
-$sign = \xing\payment\drive\PayFactory::getInstance($payName)
-  ->init($set)
+$aliConfig = [
+     'title' => '支付宝支付',
+     'appId' => '支付宝appId',
+     'notifyUrl' => '异步通知 url',
+
+     'alipayrsaPublicKey' => '支付宝公钥（字符串），详情请查看支付宝生成公钥的文档',
+
+     'rsaPrivateKey' => '支付宝私钥（字符串），详情请查看支付宝生成私钥的文档',
+ ];
+$sign = \xing\payment\drive\PayFactory::getInstance('aliPay')
+  ->init($aliConfig)
   ->set('订单号', '金额', '支付标题（商品名）')
+  ->customParams('自定义参数值')
   ->getSign();
   
 // 生成微信app需要的参数
-$payName = 'weChatPay';
+$wechatConfig = [
+    'title' => '微信支付',
+    'appId' => '微信支付appId',
+    'mchId' => '商户id',
+    'notifyUrl' => '异步通知 url',
+    // 请换成你自己的相应的文证书件地址
+    'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
+    'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
+];
 $set = PaymentSetMap::getSet($payName);
-$sign = \xing\payment\drive\PayFactory::getInstance($payName)
+$sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
   ->init($set)
   ->set('订单号', '金额', '支付标题（商品名）')
   ->customParams('自定义参数值')
   ->getSign();
  
-// 生成app所有支付方式需要的参数（数组）
-$paySet = PaymentSetMap::getPayments();
+// 配置数组：注意键名为相应正确的支付驱动英文名
+$paySet = [
+    'aliPay' => $aliConfig,
+    'weChatPay' => $wechatConfig
+];
 $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
 
 ```
@@ -121,10 +81,14 @@ try {
 # 微信回调通知可参考支付宝异步通知
 ```
 
-### paypal 使用示例
+# paypal
 #### Notify
 ```php
 <?php
+$config = [
+    'clientId' => '商家id',
+    'clientSecret' => 'Secret',
+];
 $requestBody = file_get_contents('php://input');
 try {
     $isSandbox = false; // 是否沙箱环境
@@ -136,7 +100,7 @@ try {
 }
 ```
 
-## payssion
+# payssion
 ### notify
 ```php
 <?php
@@ -144,7 +108,6 @@ $set = [
    'apiKey' => 'apiKey',
    'secretKey' => 'secretKey'
 ];
-$orderSn = $_POST['order_id'] ?? null;
 try {
 
     if(\xing\payment\drive\PaySsion::init($set)->validate($_POST)) {
