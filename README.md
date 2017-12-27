@@ -50,9 +50,8 @@ $wechatConfig = [
     'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
     'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
 ];
-$set = PaymentSetMap::getSet($payName);
 $sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
-  ->init($set)
+  ->init($wechatConfig)
   ->set('订单号', '金额', '支付标题（商品名）')
 //  ->customParams('自定义参数值，需要请取消注释')
   ->getSign();
