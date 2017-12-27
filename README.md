@@ -53,8 +53,6 @@ class PaymentSetMap
     'payPal' => [
         'clientId' => '商家id',
         'clientSecret' => 'Secret',
-        // 钩子id 到paypal后台增加webhook
-        'WebhookID' => 'xxxxxxxxx'
         ]
     ];
 
@@ -150,9 +148,9 @@ $orderSn = $_POST['order_id'] ?? null;
 try {
 
     if(\xing\payment\drive\PaySsion::init($set)->validate($_POST)) {
-
+        // 验证成功
     } else {
-        throw new \Exception('');
+        throw new \Exception('验证支付失败');
     }
 }
 catch(\Exception $e)
