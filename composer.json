@@ -1,11 +1,10 @@
 {
     "name": "xing.chen/payment",
-    "description": "支付第三方类库，支持：支付宝、微信、payPal、俄罗斯qiwi（正在开发）",
+    "description": "支付第三方类库，支持：支付宝、微信、payPal、payssion",
     "license": "mit",
     "authors": [
         {
-            "name": "chen xing",
-            "email": "877349686@qq.com"
+            "name": "chen xing"
         }
     ],
     "require": {

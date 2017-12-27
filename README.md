@@ -126,10 +126,35 @@ try {
 <?php
 $requestBody = file_get_contents('php://input');
 try {
-    $bool = \xing\payment\drive\PayPal::init($config)->validate($requestBody);
+    $isSandbox = false; // 是否沙箱环境
+    $bool = \xing\payment\drive\PayPal::init($config)->sandbox($isSandbox)->validate($requestBody);
     if (!$bool) throw new \Exception('验证失败');
     // 验证通过，订单业务代码.....
 } catch (\Exception $e) {
     exit($e->getMessage());
+}
+```
+
+## payssion
+### notify
+```php
+<?php
+$set = [
+   'apiKey' => 'apiKey',
+   'secretKey' => 'secretKey'
+];
+$orderSn = $_POST['order_id'] ?? null;
+try {
+
+    if(\xing\payment\drive\PaySsion::init($set)->validate($_POST)) {
+
+    } else {
+        throw new \Exception('');
+    }
+}
+catch(\Exception $e)
+{
+    Yii::error($e->getMessage(), __METHOD__);
+    return $this->error($e->getMessage(), $e->getCode());
 }
 ```
