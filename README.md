@@ -1,5 +1,8 @@
 # payment
 支付插件 支持：支付宝、微信、payPal、payssion
+
+# 安装
+composer require xing.chen/payment dev-master
 ## 插件介绍
 
 本插件使用简单方便，扩展性强，它拥有如下特点：
