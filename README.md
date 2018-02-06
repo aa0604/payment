@@ -15,7 +15,7 @@ composer require xing.chen/payment dev-master
 
 4、使用命名空间，可以方便的集成到TP3.2以上，YII2等主流框架中使用
 
-## 注意
+## 注
 1、本插件在正式项目中使用，按需求开发和更新
 
 2、只支持app支付参数生成和异步通知

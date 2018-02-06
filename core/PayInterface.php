@@ -51,4 +51,6 @@ interface PayInterface
     public function autoActionFrom();
 
     public function validate($post = null);
+
+    public function refund();
 }

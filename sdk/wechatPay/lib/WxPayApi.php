@@ -44,15 +44,74 @@ class WxPayApi
 		//签名
 		$inputObj->SetSign($inputObj->key);
 		$xml = $inputObj->ToXml();
-		
+
 		$startTimeStamp = self::getMillisecond();//请求开始时间
 		$response = self::postXmlCurl($xml, $url, false, $timeOut);
 		$result = WxPayResults::Init($response);
 //		self::reportCostTime($url, $startTimeStamp, $result);//上报请求花费时间
-		
+
 		return $result;
 	}
-	
+
+    /**
+     * app下单
+     * @param \xing\payment\sdk\wechatPay\WxPayUnifiedOrder $inputObj
+     * @param int $timeOut
+     * @return array
+     * @throws WxPayException
+     */
+    public static function appUnifiedOrder($inputObj, $timeOut = 6)
+    {
+        $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
+        //检测必填参数
+        if(!$inputObj->IsOut_trade_noSet()) {
+            throw new WxPayException("缺少统一支付接口必填参数out_trade_no！");
+        }else if(!$inputObj->IsBodySet()){
+            throw new WxPayException("缺少统一支付接口必填参数body！");
+        }else if(!$inputObj->IsTotal_feeSet()) {
+            throw new WxPayException("缺少统一支付接口必填参数total_fee！");
+        }else if(!$inputObj->IsTrade_typeSet()) {
+            throw new WxPayException("缺少统一支付接口必填参数trade_type！");
+        }
+
+        //关联参数
+        if($inputObj->GetTrade_type() == "JSAPI" && !$inputObj->IsOpenidSet()){
+            throw new WxPayException("统一支付接口中，缺少必填参数openid！trade_type为JSAPI时，openid为必填参数！");
+        }
+        if($inputObj->GetTrade_type() == "NATIVE" && !$inputObj->IsProduct_idSet()){
+            throw new WxPayException("统一支付接口中，缺少必填参数product_id！trade_type为JSAPI时，product_id为必填参数！");
+        }
+
+        $inputObj->SetSpbill_create_ip($_SERVER['REMOTE_ADDR']);//终端ip
+        //$inputObj->SetSpbill_create_ip("1.1.1.1");
+        $inputObj->SetNonce_str(self::getNonceStr());//随机字符串
+
+        //签名
+        $inputObj->SetSign($inputObj->key);
+        $xml = $inputObj->ToXml();
+
+        $startTimeStamp = self::getMillisecond();//请求开始时间
+        $response = self::postXmlCurl($xml, $url, false, $timeOut);
+        $result = WxPayResults::Init($response);
+//		self::reportCostTime($url, $startTimeStamp, $result);//上报请求花费时间
+
+        // 统一下单接口返回正常的prepay_id，再按签名规范重新生成签名后，将数据传输给APP。
+        // 参与签名的字段名为appId，partnerId，prepayId，nonceStr，timeStamp，package。注意：package的值格式为Sign=WXPay
+        $time_stamp = time();
+        $pack	= 'Sign=WXPay';
+        //输出参数列表
+        $prePayParams =array();
+        $prePayParams['appid']		=$result['appid'];
+        $prePayParams['partnerid']	=$result['mch_id'];
+        $prePayParams['prepayid']	=$result['prepay_id'];
+        $prePayParams['noncestr']	=$result['nonce_str'];
+        $prePayParams['package']	=$pack;
+        $prePayParams['timestamp']	=$time_stamp;
+        //echo json_encode($prePayParams);
+        $result = WxPayResults::InitFromArray($prePayParams,true)->GetValues();
+
+        return $result;
+    }
 	/**
 	 * 
 	 * 查询订单，WxPayOrderQuery中out_trade_no、transaction_id至少填一个
@@ -513,14 +572,22 @@ class WxPayApi
 		curl_setopt($ch, CURLOPT_TIMEOUT, $second);
 
 		curl_setopt($ch,CURLOPT_URL, $url);
-		curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,TRUE);
+		/*curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,TRUE);
 		curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,2);//严格校验
+        curl_setopt($ch,CURLOPT_SSLVERSION,CURL_SSLVERSION_TLSv1);*/
 		//设置header
 		curl_setopt($ch, CURLOPT_HEADER, FALSE);
 		//要求结果为字符串且输出到屏幕上
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-	
-		if($useCert == true){
+        if(stripos($url,"https://")!==FALSE){
+            curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+        }    else    {
+            curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,TRUE);
+            curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,2);//严格校验
+        }
+        if($useCert == true){
 			//设置证书
 			//使用证书：cert 与 key 分别属于两个.pem文件
 			curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');

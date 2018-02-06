@@ -78,7 +78,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $this->params['body'] = $body;
         $this->params['subject'] = $title;
         $this->params['total_amount'] = $amount;
-        $this->params['timeout_express'] = '30m';
+//        $this->params['timeout_express'] = '30m';
         return $this;
     }
 
@@ -145,6 +145,11 @@ class AliPay implements \xing\payment\core\PayInterface
      */
     public function validate($post = null)
     {
-        return $this->getAopClient()->rsaCheckV1($post, NULL, "RSA");
+        return $this->getAopClient()->rsaCheckV1($post, NULL, "RSA2");
+    }
+
+    public function refund()
+    {
+
     }
 }

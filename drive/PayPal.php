@@ -166,6 +166,11 @@ class PayPal implements \xing\payment\core\PayInterface
             $this->gateway = new \Braintree_Gateway(['accessToken' => $this->config['accessToken']]);
         return $this->gateway;
     }
+
+    public function refund()
+    {
+
+    }
 }
 
 /**

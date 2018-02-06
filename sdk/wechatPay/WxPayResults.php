@@ -31,7 +31,7 @@ class WxPayResults extends \xing\payment\sdk\wechatPay\WxPayDataBase
             throw new WxPayException("签名错误！");
         }
 
-        $sign = $this->MakeSign();
+        $sign = $this->MakeSign(WECHAT_KEY);
         if($this->GetSign() == $sign){
             return true;
         }
@@ -60,9 +60,12 @@ class WxPayResults extends \xing\payment\sdk\wechatPay\WxPayDataBase
         $obj->FromArray($array);
         if($noCheckSign == false){
             $obj->CheckSign();
+        }else{
+            $obj->SetSign(WECHAT_KEY);
         }
         return $obj;
     }
+
 
     /**
      *

@@ -81,4 +81,9 @@ class PaySsion implements \xing\payment\core\PayInterface
 
         return false;
     }
+
+    public function refund()
+    {
+
+    }
 }

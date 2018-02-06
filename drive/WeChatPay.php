@@ -11,6 +11,15 @@ namespace xing\payment\drive;
 use xing\payment\sdk\wechatPay\lib\WxPayApi;
 use xing\payment\sdk\wechatPay\WxPayUnifiedOrder;
 
+/**
+ * Class WeChatPay
+ * @property WxPayUnifiedOrder $payObject
+ * @property string $notifyUrl
+ * @property string $returnUrl
+ * @property string $config
+ * @package xing\payment\drive
+ */
+
 class WeChatPay implements \xing\payment\core\PayInterface
 {
 
@@ -27,15 +36,38 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $class->config = $config;
         $class->notifyUrl = $config['notifyUrl'];
         $class->returnUrl = $config['returnUrl'] ?? '';
+        $class->payObject = new WxPayUnifiedOrder();
 
         return $class;
     }
 
+    /**
+     * 100分换成1元
+     * @param $amount
+     * @return int
+     */
+    public function centsToYuan($cents)
+    {
+        return $cents / 100;
+    }
+
+
+    /**
+     * 1元钱换成100分钱
+     * @param $amount
+     * @return int
+     */
+    private function yuanToCents($yuan)
+    {
+        return intval($yuan * 100);
+    }
+
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
+        # 元换分
+        $amount = $this->yuanToCents($amount);
 
-        $this->payObject = new WxPayUnifiedOrder();
-        $this->payObject->SetBody($body);
+        $this->payObject->SetBody($body ?: $title);
         $this->payObject->SetOut_trade_no($outOrderSn);
         $this->payObject->SetTotal_fee($amount);
         $this->payObject->SetTime_start(date("YmdHis"));
@@ -50,6 +82,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $rootPath = dirname(dirname(dirname(dirname(__DIR__)))) . '/';
         define('SSLCERT_PATH', $rootPath . $this->config['SSL_CERT_PATH']);
         define('SSLKEY_PATH', $rootPath . $this->config['SSL_KEY_PATH']);
+        define('WECHAT_KEY', $this->config['key']);
         return $this;
     }
 
@@ -70,7 +103,6 @@ class WeChatPay implements \xing\payment\core\PayInterface
     public function getAppParam()
     {
         $return = WxPayApi::unifiedOrder($this->payObject, 15);
-        if ($return['return_code'] == 'FAIL') throw new \Exception($return['return_msg']);
         return json_encode($return);
     }
 
@@ -81,6 +113,12 @@ class WeChatPay implements \xing\payment\core\PayInterface
     }
 
     public function validate($post = null)
+    {
+        $notify = new \xing\payment\extendSdk\weChat\WeChatNotifyExtend();
+        return $notify->Handle(true);
+    }
+
+    public function refund()
     {
 
     }
