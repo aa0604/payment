@@ -1,5 +1,5 @@
 # payment
-支付插件 支持：支付宝、微信、payPal、payssion
+支付第三方类库，支持：支付宝、微信、payPal、payssion，支付和验证异步通知，并可生成支付宝、微信app签名
 
 # 安装
 composer require xing.chen/payment dev-master

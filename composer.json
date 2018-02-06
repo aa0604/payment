@@ -1,7 +1,7 @@
 {
     "name": "xing.chen/payment",
-    "description": "支付第三方类库，支持：支付宝、微信、payPal、payssion",
-    "license": "mit",
+    "description": "支付第三方类库，支持：支付宝、微信、payPal、payssion，支付和验证异步通知，并可生成支付宝、微信app签名",
+    "license": "MIT",
     "authors": [
         {
             "name": "chen xing"
