@@ -29,6 +29,9 @@ class WeChatPay implements \xing\payment\core\PayInterface
     private $config;
     private $payObject;
 
+    private $orderSn;
+    private $amount;
+
     public static function init($config)
     {
 
@@ -64,8 +67,11 @@ class WeChatPay implements \xing\payment\core\PayInterface
 
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
+        $this->orderSn = $outOrderSn;
+
         # 元换分
         $amount = $this->yuanToCents($amount);
+        $this->amount = $amount;
 
         $this->payObject->SetBody($body ?: $title);
         $this->payObject->SetOut_trade_no($outOrderSn);
@@ -118,9 +124,22 @@ class WeChatPay implements \xing\payment\core\PayInterface
         return $notify->Handle(true);
     }
 
-    public function refund()
+    /**
+     * 原路退款
+     * @param string $reason
+     * @return \xing\payment\sdk\wechatPay\lib\成功时返回，其他抛异常
+     * @throws \xing\payment\sdk\wechatPay\lib\WxPayException
+     */
+    public function refund($reason = '')
     {
 
+        $input = new WxPayRefund();
+        $input->SetOut_trade_no($this->orderSn);
+        $input->SetTotal_fee($this->amount);
+        $input->SetRefund_fee($this->amount);
+        $input->SetOut_refund_no($this->config['mchId'].date("YmdHis"));
+        $input->SetOp_user_id($this->config['mchId']);
+        return WxPayApi::refund($input);
     }
 
 }

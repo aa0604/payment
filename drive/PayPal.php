@@ -167,7 +167,7 @@ class PayPal implements \xing\payment\core\PayInterface
         return $this->gateway;
     }
 
-    public function refund()
+    public function refund($reason = '')
     {
 
     }

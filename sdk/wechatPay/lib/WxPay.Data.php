@@ -4,7 +4,6 @@
 **/
 namespace xing\payment\sdk\wechatPay\lib;
 
-use xing\payment\sdk\wechatPay\lib\WxPayException;
 
 
 /**

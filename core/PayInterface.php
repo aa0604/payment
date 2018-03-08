@@ -52,5 +52,5 @@ interface PayInterface
 
     public function validate($post = null);
 
-    public function refund();
+    public function refund($reason = '');
 }

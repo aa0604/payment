@@ -5,6 +5,9 @@
  * @author auto create
  * @since 1.0, 2017-04-19 20:31:51
  */
+
+namespace xing\payment\sdk\aliPay\aop\request;
+
 class AlipayTradeRefundRequest
 {
 	/** 

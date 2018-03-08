@@ -13,11 +13,15 @@
 
 namespace xing\payment\drive;
 
+use xing\payment\sdk\aliPay\aop\AopClient;
+use xing\payment\sdk\aliPay\aop\request\AlipayTradeAppPayRequest;
+
 class AliPay implements \xing\payment\core\PayInterface
 {
 
     public $notifyUrl = '通过设置 init 方法的参数$config[notifyUrl] 来设置';
     public $returnUrl = '同上，可空';
+    public $notifyRefundUrl = '退款通知网址';
 
     private $config;
 
@@ -47,12 +51,12 @@ class AliPay implements \xing\payment\core\PayInterface
     }
 
     /**
-     * @return \xing\payment\sdk\aliPay\aop\AopClient
+     * @return AopClient
      */
     private function getAopClient()
     {
         $config = & $this->config;
-        $aopClient = new \xing\payment\sdk\aliPay\aop\AopClient();
+        $aopClient = new AopClient();
         $aopClient->appId = $config['appId'];
         $aopClient->rsaPrivateKey = $config['rsaPrivateKey'];  // 请填写开发者私钥去头去尾去回车，一行字符串
         $aopClient->alipayrsaPublicKey = $config['alipayrsaPublicKey']; // 请填写支付宝公钥，一行字符串
@@ -103,10 +107,10 @@ class AliPay implements \xing\payment\core\PayInterface
      */
     public function getAppParam()
     {
-        $request = new \xing\payment\sdk\aliPay\aop\request\AlipayTradeAppPayRequest();
+        $request = new AlipayTradeAppPayRequest();
         $request->setNotifyUrl($this->notifyUrl);
         $request->setBizContent(json_encode($this->params, JSON_UNESCAPED_UNICODE));
-        return $response = $this->getAopClient()->sdkExecute($request);
+        return $this->getAopClient()->sdkExecute($request);
     }
 
     public function autoActionFrom()
@@ -148,8 +152,26 @@ class AliPay implements \xing\payment\core\PayInterface
         return $this->getAopClient()->rsaCheckV1($post, NULL, "RSA2");
     }
 
-    public function refund()
+    /**
+     * 原路退款
+     * @param string $reason
+     * @return bool|mixed|\SimpleXMLElement
+     */
+    public function refund($reason = '正常退款')
     {
+        # 设置退款金额
+        $this->params(['refund_amount' => $this->params['total_amount']]);
+        unset($this->params['total_amount']);
 
+        # 获取驱动
+        $request = new AlipayTradeRefundRequest ();
+        $request->setNotifyUrl($this->notifyRefundUrl);
+        $request->setBizContent(json_encode($this->params, JSON_UNESCAPED_UNICODE));
+        $result = $this->getAopClient()->execute($request);
+
+        # 返回结果
+        $responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
+        $resultCode = $result->$responseNode->code;
+        return !empty($resultCode) && $resultCode == 10000;
     }
 }

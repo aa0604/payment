@@ -51,14 +51,14 @@ class WxPayDataBase
 
     /**
      * 输出xml字符
-     * @throws WxPayException
+     * @throws \Exception
      **/
     public function ToXml()
     {
         if(!is_array($this->values)
             || count($this->values) <= 0)
         {
-            throw new WxPayException("数组数据异常！");
+            throw new \Exception("数组数据异常！");
         }
 
         $xml = "<xml>";
@@ -77,12 +77,12 @@ class WxPayDataBase
     /**
      * 将xml转为array
      * @param string $xml
-     * @throws WxPayException
+     * @throws \Exception
      */
     public function FromXml($xml)
     {
         if(!$xml){
-            throw new WxPayException("xml数据异常！");
+            throw new \Exception("xml数据异常！");
         }
         //将XML转为array
         //禁止引用外部xml实体
