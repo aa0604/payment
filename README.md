@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+# 概要
+本库使用interface规范，工厂模式编写，代码质量高，统一规范。美中不足的是，部分代码是用php7的新特性写的，不兼容老版本的，我们做开发的特别是新项目自然是要走在技术的前端才对。
+=======
 # 功能说明
 1、支持：支付宝、微信、payPal、payssion
 2、主要功能：全部支持支付和验证异步通知
@@ -6,21 +10,34 @@
 # 安装
 composer require xing.chen/payment dev-master
 ## 插件介绍
+>>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 
-本插件使用简单方便，扩展性强，它拥有如下特点：
 
+<<<<<<< HEAD
+# 功能说明
+1、支持：支付宝、微信、payPal、payssion
+2、主要功能：全部支持支付和验证异步通知
+3、支付宝、微信：可生成app签名，可原路退款
+4、通过工厂服务可以一次调用出所有支持的支付平台的app参数
+
+# 安装
+composer require xing.chen/payment dev-master
+=======
 1、各支付平台的类都继承使用interface接口规范
 
 2、使用工厂模式调度，可以方便的切换调用各个支付平台驱动
+>>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 
-3、通过工厂服务可以一次调用出所有支持的支付平台的app参数
 
 
+<<<<<<< HEAD
+=======
 ## 注
 1、本插件在正式项目中使用，按需求开发和更新
 2、作者时间比较紧张，一些功能（如原路退款）没有时间写上去，敬请谅解
 
 
+>>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 ### 支付宝、微信使用示例
 ```php
 <?php
@@ -64,6 +81,35 @@ $paySet = [
 ];
 $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
 
+<<<<<<< HEAD
+```
+
+### 异步通知回调示例
+```php
+<?php
+# 支付宝异步通知
+
+$payName = 'aliPay';
+$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST);
+exit($r ? 'success' : $r);
+
+# 微信回调通知
+$payName = 'weChatPay';
+$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($wechatConfig)->validate($_POST);
+if (!$r) exit('验证失败');
+# 获取微信异步通知传来的参数
+$post = $payment->getNotifyParams();
+# 这是自定义参数
+$drive = $post['attach'] ?? ''; 
+# 订单号
+$orderSn = $post['out_trade_no'];
+# 获取和订单一致的支付金额（将分转为元）
+$payMoney = $payment->centsToYuan($post['total_fee']);
+# 其他成功业务代码 
+# ……
+```
+
+=======
 ```
 
 ### 异步通知回调示例
@@ -81,6 +127,7 @@ $r = \xing\payment\drive\PayFactory::getInstance($payName)->init($wechatConfig)-
 exit($r ? 'success' : $r);
 ```
 
+>>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 # paypal
 #### Notify
 ```php

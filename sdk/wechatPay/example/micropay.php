@@ -27,7 +27,7 @@ if(isset($_REQUEST["auth_code"]) && $_REQUEST["auth_code"] != ""){
 	$input->SetAuth_code($auth_code);
 	$input->SetBody("刷卡测试样例-支付");
 	$input->SetTotal_fee("1");
-	$input->SetOut_trade_no(WxPayConfig::MCHID.date("YmdHis"));
+	$input->SetOut_trade_no(WECHAT_MCHID.date("YmdHis"));
 	
 	$microPay = new MicroPay();
 	printf_info($microPay->pay($input));

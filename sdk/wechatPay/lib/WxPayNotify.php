@@ -59,7 +59,10 @@ class WxPayNotify extends \xing\payment\extendSdk\weChat\WxPayNotifyReply
 	{
 		$msg = "OK";
 		$result = $this->NotifyProcess($data, $msg);
+<<<<<<< HEAD
+=======
 		
+>>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 		if($result == true){
 			$this->SetReturn_code("SUCCESS");
 			$this->SetReturn_msg("OK");

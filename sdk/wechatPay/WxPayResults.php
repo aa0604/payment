@@ -28,14 +28,14 @@ class WxPayResults extends \xing\payment\sdk\wechatPay\WxPayDataBase
     {
         //fix异常
         if(!$this->IsSignSet()){
-            throw new WxPayException("签名错误！");
+            throw new WxPayException("IsSignSet签名错误！");
         }
 
         $sign = $this->MakeSign(WECHAT_KEY);
         if($this->GetSign() == $sign){
             return true;
         }
-        throw new WxPayException("签名错误！");
+        throw new WxPayException("GetSign签名错误！");
     }
 
     /**
