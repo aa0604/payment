@@ -8,19 +8,13 @@
 
 namespace xing\payment\extendSdk\weChat;
 
-<<<<<<< HEAD
 use xing\payment\sdk\wechatPay\lib\WxPayOrderQuery;
-=======
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 
 class WeChatNotifyExtend extends \xing\payment\sdk\wechatPay\lib\WxPayNotify
 {
 
     public $errorMsg = '';
-<<<<<<< HEAD
     public $result;
-=======
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
     //查询订单
     public function Queryorder($transaction_id)
     {

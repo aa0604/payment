@@ -32,10 +32,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
     private $orderSn;
     private $amount;
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
     public static function init($config)
     {
 
@@ -44,12 +41,9 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $class->notifyUrl = $config['notifyUrl'];
         $class->returnUrl = $config['returnUrl'] ?? '';
         $class->payObject = new WxPayUnifiedOrder();
-<<<<<<< HEAD
         $class->payObject->SetOpenid($class->config['openId'] ?? '');
         $class->payObject->SetAppid($class->config['appId']);//公众账号ID
         $class->payObject->SetMch_id($class->config['mchId'] ?? '');//商户号
-=======
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
 
         $class->payObject->key = $class->config['key'] ?? '';
         $rootPath = dirname(dirname(dirname(dirname(__DIR__)))) . '/';
@@ -83,7 +77,6 @@ class WeChatPay implements \xing\payment\core\PayInterface
         return intval($yuan * 100);
     }
 
-<<<<<<< HEAD
     /**
      * 获取异步通知传来的值
      * @return array
@@ -97,8 +90,6 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $input->FromXml($xml);
         return $input->GetValues();
     }
-=======
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
         $this->orderSn = $outOrderSn;
@@ -115,14 +106,6 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $this->payObject->SetNotify_url($this->notifyUrl);
         $this->payObject->SetTrade_type("APP");
         $this->payObject->SetNotify_url($this->notifyUrl);//异步通知url
-<<<<<<< HEAD
-=======
-        $this->payObject->key = $this->config['key'] ?? '';
-        $rootPath = dirname(dirname(dirname(dirname(__DIR__)))) . '/';
-        define('SSLCERT_PATH', $rootPath . $this->config['SSL_CERT_PATH']);
-        define('SSLKEY_PATH', $rootPath . $this->config['SSL_KEY_PATH']);
-        define('WECHAT_KEY', $this->config['key']);
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
         return $this;
     }
 
@@ -155,12 +138,8 @@ class WeChatPay implements \xing\payment\core\PayInterface
     public function validate($post = null)
     {
         $notify = new \xing\payment\extendSdk\weChat\WeChatNotifyExtend();
-<<<<<<< HEAD
         $notify->Handle(true);
         return $notify->GetReturn_code() == 'SUCCESS';
-=======
-        return $notify->Handle(true);
->>>>>>> 945d9df2285a2e39fb50ca4bc1f8530c2d517940
     }
 
     /**
