@@ -68,7 +68,7 @@ $payName = 'aliPay或weChatPay';
 ?>
 ```
 
-### 异步通知回调示例
+### 支付宝、微信异步通知回调示例
 ```php
 <?php
 # 支付宝异步通知
@@ -93,20 +93,6 @@ $payMoney = $payment->centsToYuan($post['total_fee']);
 # ……
 ```
 
-### 异步通知回调示例
-```php
-<?php
-# 支付宝异步通知
-
-$payName = 'aliPay';
-$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST);
-exit($r ? 'success' : $r);
-
-# 微信回调通知
-$payName = 'weChatPay';
-$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($wechatConfig)->validate($_POST);
-exit($r ? 'success' : $r);
-```
 
 # paypal
 #### Notify
