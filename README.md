@@ -15,14 +15,6 @@
 composer require xing.chen/payment dev-master
 
 
-# 安装
-composer require xing.chen/payment dev-master
-
-
-## 注
-1、本插件在正式项目中使用，按需求开发和更新
-2、作者时间比较紧张，一些功能（如原路退款）没有时间写上去，敬请谅解
-
 ### 支付宝、微信使用示例
 ```php
 <?php
@@ -66,6 +58,14 @@ $paySet = [
 ];
 $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
 
+```
+
+## 支付宝、微信退款（原路退回）
+```php
+<?php
+$payName = 'aliPay或weChatPay';
+\xing\payment\drive\PayFactory::getInstance($payName)->init('上面的微信或支付宝配置')->set('订单号', '退款金额')->refund();
+?>
 ```
 
 ### 异步通知回调示例

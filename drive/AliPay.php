@@ -164,7 +164,7 @@ class AliPay implements \xing\payment\core\PayInterface
         unset($this->params['total_amount']);
 
         # 获取驱动
-        $request = new AlipayTradeRefundRequest ();
+        $request = new \xing\payment\sdk\aliPay\aop\request\AlipayTradeRefundRequest();
         $request->setNotifyUrl($this->notifyRefundUrl);
         $request->setBizContent(json_encode($this->params, JSON_UNESCAPED_UNICODE));
         $result = $this->getAopClient()->execute($request);

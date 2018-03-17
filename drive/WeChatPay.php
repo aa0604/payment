@@ -9,6 +9,7 @@
 namespace xing\payment\drive;
 
 use xing\payment\sdk\wechatPay\lib\WxPayApi;
+use xing\payment\sdk\wechatPay\lib\WxPayRefund;
 use xing\payment\sdk\wechatPay\WxPayUnifiedOrder;
 
 /**

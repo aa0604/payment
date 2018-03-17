@@ -32,8 +32,6 @@ class WxPayResults extends \xing\payment\sdk\wechatPay\WxPayDataBase
         }
 
         $sign = $this->MakeSign(WECHAT_KEY);
-        \Yii::error($sign);
-        \Yii::error($this->GetSign());
         if($this->GetSign() == $sign){
             return true;
         }

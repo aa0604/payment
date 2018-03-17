@@ -203,7 +203,7 @@ class WxPayApi
 		$inputObj->SetMch_id(WECHAT_MCHID);//商户号
 		$inputObj->SetNonce_str(self::getNonceStr());//随机字符串
 		
-		$inputObj->SetSign();//签名
+		$inputObj->SetSign(WECHAT_KEY);//签名
 		$xml = $inputObj->ToXml();
 		$startTimeStamp = self::getMillisecond();//请求开始时间
 		$response = self::postXmlCurl($xml, $url, true, $timeOut);
@@ -555,6 +555,7 @@ class WxPayApi
 			self::report($objInput);
 		} catch (WxPayException $e){
 			//不做任何处理
+            throw $e;
 		}
 	}
 

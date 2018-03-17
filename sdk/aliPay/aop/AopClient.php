@@ -2,6 +2,7 @@
 
 namespace xing\payment\sdk\aliPay\aop;
 
+use xing\payment\sdk\aliPay\lotusphp_runtime\Logger\LtLogger;
 require_once 'AopEncrypt.php';
 
 class AopClient {
