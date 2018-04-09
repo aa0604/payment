@@ -43,6 +43,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $class->config = $config;
         $class->notifyUrl = $config['notifyUrl'];
         $class->returnUrl = $config['returnUrl'] ?? '';
+        defined('AOP_SDK_WORK_DIR') ?: define("AOP_SDK_WORK_DIR", $config['logDir'] ?? sys_get_temp_dir() . '/');
 
 //        初始化支付宝和配置参数
 //        $class->AopClient = $class->getAopClient();
@@ -168,6 +169,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $request->setNotifyUrl($this->notifyRefundUrl);
         $request->setBizContent(json_encode($this->params, JSON_UNESCAPED_UNICODE));
         $result = $this->getAopClient()->execute($request);
+        if (empty($result)) return false;
 
         # 返回结果
         $responseNode = str_replace(".", "_", $request->getApiMethodName()) . "_response";
