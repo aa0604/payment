@@ -378,7 +378,7 @@ class WxPayApi
 		$inputObj->SetTime(date("YmdHis"));//商户上报时间	 
 		$inputObj->SetNonce_str(self::getNonceStr());//随机字符串
 		
-		$inputObj->SetSign();//签名
+		$inputObj->SetSign(WECHAT_KEY);//签名
 		$xml = $inputObj->ToXml();
 		
 		$startTimeStamp = self::getMillisecond();//请求开始时间
@@ -521,6 +521,7 @@ class WxPayApi
 		$endTimeStamp = self::getMillisecond();
 		$objInput = new WxPayReport();
 		$objInput->SetInterface_url($url);
+        $objInput->SetUser_ip((isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : '');
 		$objInput->SetExecute_time_($endTimeStamp - $startTimeStamp);
 		//返回状态码
 		if(array_key_exists("return_code", $data)){

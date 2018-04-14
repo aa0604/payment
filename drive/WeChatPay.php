@@ -48,11 +48,11 @@ class WeChatPay implements \xing\payment\core\PayInterface
 
         $class->payObject->key = $class->config['key'] ?? '';
         $rootPath = dirname(dirname(dirname(dirname(__DIR__)))) . '/';
-        define('SSLCERT_PATH', $rootPath . $class->config['SSL_CERT_PATH']);
-        define('SSLKEY_PATH', $rootPath . $class->config['SSL_KEY_PATH']);
-        define('WECHAT_KEY', $class->config['key']);
-        define('WECHAT_APPID', $class->config['appId']);
-        define('WECHAT_MCHID', $class->config['mchId']);
+        !defined('SSLCERT_PATH') && define('SSLCERT_PATH', $rootPath . $class->config['SSL_CERT_PATH']);
+        !defined('SSLKEY_PATH') && define('SSLKEY_PATH', $rootPath . $class->config['SSL_KEY_PATH']);
+        !defined('WECHAT_KEY') && define('WECHAT_KEY', $class->config['key']);
+        !defined('WECHAT_APPID') && define('WECHAT_APPID', $class->config['appId']);
+        !defined('WECHAT_MCHID') && define('WECHAT_MCHID', $class->config['mchId']);
 //        define('WECHAT_APPSECRET', $class->config['key']);
         return $class;
     }
