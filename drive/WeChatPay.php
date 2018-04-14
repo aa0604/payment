@@ -146,7 +146,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
     /**
      * 原路退款
      * @param string $reason
-     * @return \xing\payment\sdk\wechatPay\lib\成功时返回，其他抛异常
+     * @return array 成功时返回，其他抛异常
      * @throws \xing\payment\sdk\wechatPay\lib\WxPayException
      */
     public function refund($reason = '')
@@ -158,7 +158,8 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $input->SetRefund_fee($this->amount);
         $input->SetOut_refund_no($this->config['mchId'].date("YmdHis"));
         $input->SetOp_user_id($this->config['mchId']);
-        return WxPayApi::refund($input);
+        $result = WxPayApi::refund($input);
+        return isset($result['return_code']) && $result['return_code'] == 'SUCCESS';
     }
 
 }
