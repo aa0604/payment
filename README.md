@@ -15,11 +15,11 @@
 composer require xing.chen/payment dev-master
 
 
-### 支付宝、微信使用示例
+### 支付宝、微信配置和生成app支付签名
 ```php
 <?php
 
-// 生成支付宝app需要的参数
+// 支付宝配置
 $aliConfig = [
      'title' => '支付宝支付',
      'appId' => '支付宝appId',
@@ -29,12 +29,15 @@ $aliConfig = [
 
      'rsaPrivateKey' => '支付宝私钥（字符串），详情请查看支付宝生成私钥的文档',
  ];
+
+// 生成支付宝app需要的参数
 $sign = \xing\payment\drive\PayFactory::getInstance('aliPay')
   ->init($aliConfig)
   ->set('订单号', '金额', '支付标题（商品名）')
-//  ->customParams('自定义参数值，需要请取消注释')
-  ->getSign();
-  
+  ->customParams('自定义参数值，不需要请删除')
+  ->getAppParam();
+
+
 // 生成微信app需要的参数
 $wechatConfig = [
     'title' => '微信支付',
@@ -48,10 +51,10 @@ $wechatConfig = [
 $sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
   ->init($wechatConfig)
   ->set('订单号', '金额', '支付标题（商品名）')
-//  ->customParams('自定义参数值，需要请取消注释')
-  ->getSign();
+  ->customParams('自定义参数值，不需要请删除')
+  ->getAppParam();
  
-// 配置数组：注意键名为相应正确的支付驱动英文名
+// 获取所有参数
 $paySet = [
     'aliPay' => $aliConfig,
     'weChatPay' => $wechatConfig
@@ -60,22 +63,24 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', 
 
 ```
 
-## 支付宝、微信退款（原路退回）
-```php
-<?php
-$payName = 'aliPay或weChatPay';
-\xing\payment\drive\PayFactory::getInstance($payName)->init('上面的微信或支付宝配置')->set('订单号', '退款金额')->refund();
-?>
-```
 
-### 支付宝、微信异步通知回调示例
+### 支付宝 异步通知
 ```php
 <?php
 # 支付宝异步通知
 
+
+$drive = Yii::$app->request->post('passback_params'); // 自定义参数
+$orderSn = Yii::$app->request->post('out_trade_no'); // 订单号
+$payMoney = Yii::$app->request->post('total_amount'); // 支付金额
+            
 $payName = 'aliPay';
-$r = \xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST);
-exit($r ? 'success' : $r);
+if (!\xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST)) throw new \Exception('验证失败');
+```
+
+## 微信异步通知
+```php
+<?php
 
 # 微信回调通知
 $payName = 'weChatPay';
@@ -91,6 +96,14 @@ $orderSn = $post['out_trade_no'];
 $payMoney = $payment->centsToYuan($post['total_fee']);
 # 其他成功业务代码 
 # ……
+
+```
+## 支付宝、微信退款（原路退回）
+```php
+<?php
+$payName = 'aliPay或weChatPay';
+\xing\payment\drive\PayFactory::getInstance($payName)->init('上面的微信或支付宝配置')->set('订单号', '退款金额')->refund();
+?>
 ```
 
 
