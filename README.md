@@ -1,6 +1,28 @@
 # 概要
 本库使用interface规范，工厂模式编写，代码质量高，统一规范。美中不足的是，部分代码是用php7的新特性写的，不兼容老版本的，我们做开发的特别是新项目自然是要走在技术的前端才对。
 
+# 目录
+* [支付宝](#支付宝)
+    * 支付宝配置
+    * 生成app签名
+    * 支付宝异步通知
+    * 支付宝退款（原路退回）
+* [微信](#微信)
+    * 微信配置
+    * 生成app签名
+    * 微信异步通知
+    * 微信退款（原路退回）
+* [paypal](#paypal)
+    * 异步通知
+* [payssion](#payssion)
+    * 异步通知
+* [银联](#银联)
+    * 异步通知
+* [首信易](#首信易)
+    * 异步通知
+
+
+
 # 功能说明
 1、支持：支付宝、微信、银联、payPal、payssion，首信易支付
 
@@ -15,7 +37,8 @@
 composer require xing.chen/payment dev-master
 
 
-### 支付宝、微信配置和生成app支付签名
+# 支付宝
+### 支付宝配置
 ```php
 <?php
 
@@ -29,40 +52,18 @@ $aliConfig = [
 
      'rsaPrivateKey' => '支付宝私钥（字符串），详情请查看支付宝生成私钥的文档',
  ];
+```
 
-// 生成支付宝app需要的参数
+### 支付宝 生成app支付需要的签名
+```php
+<?php
 $sign = \xing\payment\drive\PayFactory::getInstance('aliPay')
   ->init($aliConfig)
   ->set('订单号', '金额', '支付标题（商品名）')
-  ->customParams('自定义参数值，不需要请删除')
+  //->customParams('自定义参数值')
   ->getAppParam();
-
-
-// 生成微信app需要的参数
-$wechatConfig = [
-    'title' => '微信支付',
-    'appId' => '微信支付appId',
-    'mchId' => '商户id',
-    'notifyUrl' => '异步通知 url',
-    // 请换成你自己的相应的文证书件地址
-    'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
-    'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
-    'key' => '微信32位的API支付密钥',
-];
-$sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
-  ->init($wechatConfig)
-  ->set('订单号', '金额', '支付标题（商品名）')
-  ->customParams('自定义参数值，不需要请删除')
-  ->getAppParam();
- 
-// 获取所有参数
-$paySet = [
-    'aliPay' => $aliConfig,
-    'weChatPay' => $wechatConfig
-];
-$payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
-
 ```
+
 
 
 ### 支付宝 异步通知
@@ -79,6 +80,43 @@ $payName = 'aliPay';
 if (!\xing\payment\drive\PayFactory::getInstance($payName)->init($aliConfig)->validate($_POST)) throw new \Exception('验证失败');
 ```
 
+### 支付 退款（原路）
+```php
+<?php
+
+$payName = 'aliPay或weChatPay';
+\xing\payment\drive\PayFactory::getInstance('aliPay')->init($aliConfig)->set('订单号', '退款金额')->refund();
+```
+
+# 微信
+
+### 微信配置
+```php
+<?php
+
+
+// 生成微信app需要的参数
+$wechatConfig = [
+    'title' => '微信支付',
+    'appId' => '微信支付appId',
+    'mchId' => '商户id',
+    'notifyUrl' => '异步通知 url',
+    // 请换成你自己的相应的文证书件地址
+    'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
+    'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
+    'key' => '微信32位的API支付密钥',
+];
+```
+### 微信 生成app支付需要的签名
+```php
+<?php
+
+$sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
+  ->init($wechatConfig)
+  ->set('订单号', '金额', '支付标题（商品名）')
+  //->customParams('自定义参数值')
+  ->getAppParam();
+```
 ## 微信异步通知
 ```php
 <?php
@@ -99,14 +137,23 @@ $payMoney = $payment->centsToYuan($post['total_fee']);
 # ……
 
 ```
-## 支付宝、微信退款（原路退回）
+### 微信 退款（原路）
 ```php
 <?php
-$payName = 'aliPay或weChatPay';
-\xing\payment\drive\PayFactory::getInstance($payName)->init('上面的微信或支付宝配置')->set('订单号', '退款金额')->refund();
+\xing\payment\drive\PayFactory::getInstance('weChatPay')->init($wechatConfig)->set('订单号', '退款金额')->refund();
 ?>
 ```
 
+## 支付宝、微信 一起生成app签名
+```php
+<?php
+$paySet = [
+    'aliPay' => $aliConfig,
+    'weChatPay' => $wechatConfig
+];
+$payChannel= \xing\payment\drive\PayFactory::getAppsParam($paySet, '订单号', '金额', '支付标题（商品名）');
+
+```
 
 # paypal
 #### Notify
