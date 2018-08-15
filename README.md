@@ -11,7 +11,7 @@
 4、通过工厂服务可以一次调用出所有支持的支付平台的app参数
 
 
-# 安装
+### 安装
 composer require xing.chen/payment dev-master
 
 
@@ -149,9 +149,11 @@ catch(\Exception $e)
 }
 ```
 
-# 银联后端处理
+# 银联
 说明：
+
 手机控件支付：银联需要先获取流水号再返回给前端app，app支付成功后才能成功接收银联的异步通知结果。
+
 ## 获取银联流水号
 ```php
 <?php
@@ -185,6 +187,23 @@ $config = [
  */
 try {
     $tn = UnionPay::init($config)->createOrder($orderSn, $payMoney);
+} catch (\Exception $e) {
+    throw $e;
+}
+```
+
+### 银联异步通知
+```php
+<?php
+
+try {
+    if (!UnionPay::init($config)->validate($_POST)) throw new \Exception('验签失败');
+
+    $orderSn = $_POST['orderId'];
+    // 分转元
+    $payMoney = round(Yii::$app->request->post('txnAmt') / 100, 2);
+    // 成功后业务代码
+    exit('success');
 } catch (\Exception $e) {
     throw $e;
 }
