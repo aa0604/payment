@@ -47,6 +47,7 @@ $wechatConfig = [
     // 请换成你自己的相应的文证书件地址
     'SSL_CERT_PATH' =>  'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_cert.pem',
     'SSL_KEY_PATH' => 'vendor/xing.chen/payment/sdk/wechatPay/cert/apiclient_key.pem',
+    'key' => '微信32位的API支付密钥',
 ];
 $sign = \xing\payment\drive\PayFactory::getInstance('weChatPay')
   ->init($wechatConfig)
