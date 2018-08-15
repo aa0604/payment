@@ -148,3 +148,88 @@ catch(\Exception $e)
     exit($e->getMessage());
 }
 ```
+
+# 银联后端处理
+说明：
+手机控件支付：银联需要先获取流水号再返回给前端app，app支付成功后才能成功接收银联的异步通知结果。
+## 获取银联流水号
+```php
+<?php
+$orderSn = '订单号';
+$payMoney = '支付金额/单位分';
+$test = true; // 是否测试环境
+$config = [
+    // 配置和证书的路径
+  'certsPath' => dirname(__DIR__) . '/config/certs'.(!$test ? '' : '_test').'/',
+  'merId' => $test ? 777290058110048 : '商户号',
+];
+/**
+ * certsPath文件说明：
+ * 以下文件当你和银联那边对接通之后，他们的资源包会包含以下文件，除了复制到程序里之外，你还需要根据银联的教程将部分文件配置好。
+ * 
+ * 生产环境 certsPath 应包含的文件
+ * config/certs/acp_prod_enc.cer
+ * config/certs/acp_prod_middle.cer
+ * config/certs/acp_prod_root.cer
+ * config/certs/acp_sdk.ini
+ * config/certs/cfca.cer
+ * config/certs/cfca.pfx
+ * 
+ * 
+ * 测试环境 certsPath 应包含的文件
+ * config/certs_test/acp_sdk.ini
+ * config/certs_test/acp_test_enc.cer
+ * config/certs_test/acp_test_middle.cer
+ * config/certs_test/acp_test_root.cer
+ * config/certs_test/acp_test_sign.pfx
+ */
+try {
+    $tn = UnionPay::init($config)->createOrder($orderSn, $payMoney);
+} catch (\Exception $e) {
+    throw $e;
+}
+```
+
+# 首信易支付
+### 异步通知
+```php
+<?php
+
+try {
+
+    $orderSn = $_REQUEST['v_oid'] ?? '';
+    if (empty($orderSn)) throw new \Exception('订单号没有获取到');
+    if(BeijinPay::init([])->validate($_REQUEST)) {
+
+        $count = $_REQUEST['v_count'] ?? 0;//订单个数
+        if ($count <= 0) throw new \Exception('订单个数小于0');
+
+        $v_oid=$_REQUEST['v_oid'];//订单编号组
+        $v_pstatus=$_REQUEST['v_pstatus'];//支付状态组
+        $v_amount=$_REQUEST['v_amount'];//订单支付金额
+        $v_moneytype=$_REQUEST['v_moneytype'];//订单支付币种
+
+        $sp = '|_|';
+        $a_oid = explode($sp, $v_oid);
+        $a_pstatus = explode($sp, $v_pstatus);
+        $a_amount = explode($sp, $v_amount);
+
+        // 通知可能包含多个订单通知，所以循环
+        for ($i = 0; $i < $count; $i++) {
+
+            $orderSn = preg_replace('/(.*)-/', '', $a_oid[$i]);
+            if($a_pstatus[$i]=='1')
+            {
+                // 支付成功，业务代码
+            }
+        }
+
+        exit('success');
+    } else {
+        throw new \Exception('验证订单失败');
+    }
+
+} catch(\Exception $e) {
+    throw $e;
+}
+```

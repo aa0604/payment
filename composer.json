@@ -1,6 +1,6 @@
 {
     "name": "xing.chen/payment",
-    "description": "支付宝、微信、payPal、payssion，使用命名空间，可在YII框架中使用，也可以独立使用。使用官方SDK修改，APP支付和验证异步通知，并可生成支付宝、微信app签名，已修复微信官方SDK的众多BUG",
+    "description": "支付宝、微信、银联、payPal、payssion，首信易支付等第三方支付，所有支付使用工厂模式接口规范设计开发。使用命名空间，可在YII框架中使用，也可以独立使用。使用官方SDK修改，APP支付和验证异步通知，并可生成支付宝、微信app签名，已修复微信官方SDK的众多BUG",
     "license": "MIT",
     "authors": [
         {
