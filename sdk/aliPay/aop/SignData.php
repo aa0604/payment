@@ -6,6 +6,8 @@
  * Time: 下午6:21
  */
 
+namespace xing\payment\sdk\aliPay\aop;
+
 class SignData {
 
     public $signSourceData=null;

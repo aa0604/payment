@@ -1,4 +1,5 @@
 <?php
+namespace xing\payment\sdk\aliPay\aop\request;
 /**
  * ALIPAY API: zhima.customer.certification.certify request
  *
