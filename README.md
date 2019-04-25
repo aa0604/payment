@@ -1,11 +1,11 @@
-#概要
+# 概要
 本库使用interface规范，工厂模式编写，代码质量高，统一规范。
 
 简单说好处就是，在控制器里，你只需要写几行代码，你就可以对接多个支付。想要做到这一点，需要前端向传递服务端使用哪个支付驱动代码，服务端再根据支付驱动代码去调用相应的支付程序。
 
 美中不足的是，部分代码是用php7的新特性写的，不兼容老版本的，我们做开发的特别是新项目自然是要走在技术的前端才对。
 
-#目录
+# 目录
 * [安装](#安装)
 * [支付驱动代码列表](#支付驱动代码列表)
     * [支付宝支付](#支付宝支付)
@@ -47,7 +47,7 @@
 
 
 
-#功能说明
+# 功能说明
 1、支持：支付宝、微信、银联、payPal、payssion，首信易支付
 
 2、主要功能：全部支持支付和验证异步通知
@@ -57,29 +57,29 @@
 4、通过工厂服务可以一次调用出所有支持的支付平台的app参数
 
 
-##安装
+## 安装
 composer require xing.chen/payment dev-master
 
-##支付驱动代码列表
+## 支付驱动代码列表
 说明：在此方法传递参数时传入此代码即调用相应的支付驱动
 \xing\payment\drive\PayFactory::getInstance('支付驱动代码')
-####支付宝支付
+#### 支付宝支付
 aliPay
-####微信支付
+#### 微信支付
 weChatPay
-####首信易支付
+#### 首信易支付
 BeijinPay
-####银联
+#### 银联
 UnionPay
-####PaySsion
+#### PaySsion
 PaySsion
-####PayPal
+#### PayPal
 PayPal
-####苹果支付
+#### 苹果支付
 ApplePay
 
-##统一方法
-###初始化
+## 统一方法
+### 初始化
 ```php
 <?php
 
@@ -87,7 +87,7 @@ $payName = '支付驱动代码'; // 支付驱动代码
 $payInstance = \xing\payment\drive\PayFactory::getInstance($payName)->init('支付驱动 的配置，详情看配置篇');
 ```
 
-###生成app签名
+### 生成app签名
 ```php
 <?php
 // 单个
@@ -100,7 +100,7 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam([
 ], '订单号', '金额', '支付标题（商品名）');
 ```
 
-###异步通知
+### 异步通知
 ```php
 <?php
 // 如无特别说明，传递的参数都是是$_POST，但有些支付厂商不能使用$_POST，如paypal，微信等，请参考获取异步通知参数说明
@@ -108,20 +108,20 @@ if (!$payInstance->validate($_POST))
     throw new \Exception('非法请求');
 ```
 
-###退款
+### 退款
 
 ```php
 <?php
 $payInstance->set('订单号', '退款金额')->refund();
 ```
-###设置自定义参数
+### 设置自定义参数
 ```php
 <?php 
 $payInstance->customParams('自定义参数（字符串）');
 ```
 
-##苹果内购
-###苹果流程说明
+## 苹果内购
+### 苹果流程说明
 。
 
 整个支付流程建议为：
@@ -131,7 +131,7 @@ $payInstance->customParams('自定义参数（字符串）');
 4、支付成功后，客户端保存成功的数据，向服务端发送receipt数据以及订单号
 5、服务端根据服务端数据库的订单状态或保存的receipt原始订单id来判断是否使用过，避免刷单，如未使用，则发起验证，验证通过保存receipt为已使用。
 
-###苹果配置
+### 苹果配置
 ```php
 <?php
 
@@ -141,7 +141,7 @@ $appleSet = [
 ];
 ```
 
-###苹果获取订单参数
+### 苹果获取订单参数
 说明：和支付宝，微信的生成app签名的方法一样，不同的是，第4个参数为产品id，这样可以使后端一套代码应付多个支付平台，并且使苹果内购支付前的流程和支付宝微信相似。
 ```php
 <?php
@@ -149,7 +149,7 @@ $appleSet = [
 $orderInfo = $payInstance->set('订单号', '金额', '', '产品id')->getAppParam();
 ```
 
-###苹果漏单处理
+### 苹果漏单处理
 有三个步骤有可能造成漏单：
 
 1、服务端并不能保证100%在线。
@@ -162,8 +162,8 @@ $orderInfo = $payInstance->set('订单号', '金额', '', '产品id')->getAppPar
 
 客户端保存支付成功数据，在未得到服务成功的信号前，一直存在，并有不断重启请求任务的机制，并且app重启也能重启此任务。
 
-##支付宝
-###支付宝配置
+## 支付宝
+### 支付宝配置
 ```php
 <?php
 
@@ -178,7 +178,7 @@ $aliConfig = [
      'rsaPrivateKey' => '支付宝私钥（字符串），详情请查看支付宝生成私钥的文档',
  ];
 ```
-###支付宝获取异步通知参数
+### 支付宝获取异步通知参数
 ```php
 <?php
 $params = $_POST['passback_params']; // 自定义参数
@@ -186,8 +186,8 @@ $orderSn = $_POST['out_trade_no']; // 订单号
 $payMoney = $_POST['total_amount']; // 支付金额
 ```
 
-##微信
-###微信配置
+## 微信
+### 微信配置
 ```php
 <?php
 
@@ -204,30 +204,30 @@ $wechatConfig = [
 
 ```
 
-###微信获取异步通知参数
+### 微信获取异步通知参数
 ```php
 <?php
 
-#获取微信异步通知传来的参数
+# 获取微信异步通知传来的参数
 $post = $payInstance->getNotifyParams();
-#这是自定义参数
+# 这是自定义参数
 $drive = $post['attach'] ?? ''; 
-#订单号
+# 订单号
 $orderSn = $post['out_trade_no'];
 ```
 
-###微信分转换为元
+### 微信分转换为元
 ```php
 <?php
-#获取微信异步通知传来的参数
+# 获取微信异步通知传来的参数
 $post = $payInstance->getNotifyParams();
-#获取和订单一致的支付金额（将分转为元）
+# 获取和订单一致的支付金额（将分转为元）
 $payMoney = $payInstance->centsToYuan($post['total_fee']);
 ```
-##微信
+## 微信
 
-##paypal
-###payPal配置
+## paypal
+### payPal配置
 ```php
 <?php
 $config = [
@@ -236,13 +236,13 @@ $config = [
     'sandbox' => false, // 是否开启沙箱模式
 ];
 ```
-###payPal获取异步通知参数
+### payPal获取异步通知参数
 ```php
 <?php
 $requestBody = file_get_contents('php://input');
 ```
-#payssion
-###payssion配置
+# payssion
+### payssion配置
 ```php
 <?php
 $set = [
@@ -251,11 +251,11 @@ $set = [
 ];
 ```
 
-##银联
-###银联说明
+## 银联
+### 银联说明
 
 手机控件支付：银联需要先获取流水号再返回给前端app，app支付成功后才能成功接收银联的异步通知结果。
-###银联配置
+### 银联配置
 
 ```php
 <?php
@@ -287,7 +287,7 @@ $config = [
  */
 ```
 
-###获取银联流水号
+### 获取银联流水号
 ```php
 <?php
 
@@ -300,8 +300,8 @@ try {
 }
 ```
 
-#首信易支付
-###首信易配置
+# 首信易支付
+### 首信易配置
 ```php
 <?php
 $conifg = [
@@ -313,7 +313,7 @@ $conifg = [
 ```
 
 
-###首信易异步通知
+### 首信易异步通知
 ```php
 <?php
 
