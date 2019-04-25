@@ -34,7 +34,7 @@ class WxPayNotifyReply extends  \xing\payment\sdk\wechatPay\WxPayDataBase
      */
     public function GetReturn_code()
     {
-        return $this->values['return_code'];
+        return $this->values['return_code'] ?? '';
     }
 
     /**

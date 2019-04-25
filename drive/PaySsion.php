@@ -30,7 +30,7 @@ class PaySsion implements \xing\payment\core\PayInterface
 
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
-
+        return $this;
     }
     public function params(array $params)
     {
@@ -38,7 +38,7 @@ class PaySsion implements \xing\payment\core\PayInterface
     }
     public function customParams($value)
     {
-
+        return $this;
     }
     public function getAppParam()
     {

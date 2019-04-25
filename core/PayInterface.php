@@ -36,7 +36,7 @@ interface PayInterface
     public function params(array $params);
 
     /**
-     *
+     * 设置自定义参数
      * @param $value
      * @return $this
      */

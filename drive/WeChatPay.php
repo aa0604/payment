@@ -87,10 +87,20 @@ class WeChatPay implements \xing\payment\core\PayInterface
     {
 
         $xml = file_get_contents("php://input");
+        
         $input = new \xing\payment\sdk\wechatPay\WxPayResults();
         $input->FromXml($xml);
         return $input->GetValues();
     }
+
+    /**
+     * @param $outOrderSn
+     * @param $amount
+     * @param string $title
+     * @param string $body
+     * @param string $intOrderSn
+     * @return WeChatPay
+     */
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
         $this->orderSn = $outOrderSn;
@@ -124,6 +134,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $this->payObject->SetAttach($value);
         return $this;
     }
+
     public function getAppParam()
     {
         $return = WxPayApi::appUnifiedOrder($this->payObject, 15);

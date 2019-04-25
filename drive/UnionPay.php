@@ -46,7 +46,7 @@ class UnionPay implements \xing\payment\core\PayInterface
      */
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
-        
+        return $this;
     }
 
     /**
@@ -66,7 +66,7 @@ class UnionPay implements \xing\payment\core\PayInterface
      */
     public function customParams($value)
     {
-
+        return $this;
     }
 
     /**

@@ -78,7 +78,7 @@ class WxPayNotify extends \xing\payment\extendSdk\weChat\WxPayNotifyReply
 	{
 		//如果需要签名
 		if($needSign == true && 
-			$this->GetReturn_code($return_code) == "SUCCESS")
+			$this->GetReturn_code() == "SUCCESS")
 		{
 			$this->SetSign(WECHAT_KEY);
 		}

@@ -88,7 +88,8 @@ class WxPayResults extends \xing\payment\sdk\wechatPay\WxPayDataBase
         $obj = new self();
         $obj->FromXml($xml);
         //fix bug 2015-06-29
-        if($obj->values['return_code'] != 'SUCCESS'){
+        $returnCode = $obj->values['return_code'] ?? '';
+        if($returnCode != 'SUCCESS'){
             return $obj->GetValues();
         }
         $obj->CheckSign();

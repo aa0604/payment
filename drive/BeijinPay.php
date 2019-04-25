@@ -29,16 +29,19 @@ class BeijinPay implements \xing\payment\core\PayInterface
 
     public function set($outOrderSn, $amount, $title = '', $body = '', $intOrderSn = '')
     {
-
+        return $this;
     }
+
     public function params(array $params)
     {
 
     }
+
     public function customParams($value)
     {
-
+        return $this;
     }
+
     public function getAppParam()
     {
 
