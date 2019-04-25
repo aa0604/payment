@@ -209,7 +209,7 @@ $wechatConfig = [
 <?php
 
 # 获取微信异步通知传来的参数
-$post = $payment->getNotifyParams();
+$post = $payInstance->getNotifyParams();
 # 这是自定义参数
 $drive = $post['attach'] ?? ''; 
 # 订单号
@@ -220,9 +220,9 @@ $orderSn = $post['out_trade_no'];
 ```php
 <?php
 # 获取微信异步通知传来的参数
-$post = $payment->getNotifyParams();
+$post = $payInstance->getNotifyParams();
 # 获取和订单一致的支付金额（将分转为元）
-$payMoney = $payment->centsToYuan($post['total_fee']);
+$payMoney = $payInstance->centsToYuan($post['total_fee']);
 ```
 ## 微信
 
@@ -294,7 +294,7 @@ $config = [
 $orderSn = '订单号';
 $payMoney = '支付金额/单位分';
 try {
-    $tn = UnionPay::init($config)->createOrder($orderSn, $payMoney);
+    $tn = $payInstance->createOrder($orderSn, $payMoney);
 } catch (\Exception $e) {
     throw $e;
 }
@@ -321,7 +321,7 @@ try {
 
     $orderSn = $_REQUEST['v_oid'] ?? '';
     if (empty($orderSn)) throw new \Exception('订单号没有获取到');
-    if(BeijinPay::init([])->validate($_REQUEST)) {
+    if($payInstance->validate($_REQUEST)) {
 
         $count = $_REQUEST['v_count'] ?? 0;//订单个数
         if ($count <= 0) throw new \Exception('订单个数小于0');
