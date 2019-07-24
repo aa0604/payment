@@ -99,6 +99,8 @@ class WxPayApi
         // 参与签名的字段名为appId，partnerId，prepayId，nonceStr，timeStamp，package。注意：package的值格式为Sign=WXPay
         $time_stamp = time();
         $pack	= 'Sign=WXPay';
+        // 兼容小程序
+        if (defined('PAY_NAME') && PAY_NAME == 'wxMiniProgram') $pack = 'prepay_id=' . $result['prepay_id'];
         //输出参数列表
         $prePayParams =array();
         $prePayParams['appid']		=$result['appid'];
