@@ -79,11 +79,11 @@
 
 
 
-## 安装
+#安装
 composer require xing.chen/payment dev-master
 
-# 业务代码示例
-### 获取签名示例代码
+#业务代码示例
+###获取签名示例代码
 ```php
 <?php
 
@@ -116,7 +116,7 @@ try {
     $set = $config[$payName] ?? null;
     if (empty($set)) throw new \Exception('读取支付设置失败，payName = ' . $payName);
 
-    $service = \xing\payment\drive\PayFactory::getInstance($payName)
+    $payInstance = \xing\payment\drive\PayFactory::getInstance($payName)
         ->init($set)
         ->customParams($module)
         ->set($orderSn, $amount, $title, $body, $intOrderSn);
@@ -125,9 +125,9 @@ try {
     if ($payName == 'wxMiniProgram') {
         $openId = '微信用户openId';
         $set['openId'] = $openId;
-        $paySign = $service->init($set)->getMiniProgramParam();
+        $paySign = $payInstance->init($set)->getMiniProgramParam();
     } else {
-        $paySign = $service->getAppParam();
+        $paySign = $payInstance->getAppParam();
     }
 
 
@@ -152,28 +152,28 @@ try {
 ```
 
 
-## 支付驱动代码列表
+##支付驱动代码列表
 说明：在此方法传递参数时传入此代码即调用相应的支付驱动
 \xing\payment\drive\PayFactory::getInstance('支付驱动代码')
-#### 支付宝支付
+####支付宝支付
 aliPay
-#### 微信支付
+####微信支付
 weChatPay
-#### 小程序支付
+####小程序支付
 weChatPay
-#### 首信易支付
+####首信易支付
 BeijinPay
-#### 银联
+####银联
 UnionPay
-#### PaySsion
+####PaySsion
 PaySsion
-#### PayPal
+####PayPal
 PayPal
-#### 苹果支付
+####苹果支付
 ApplePay
 
-## 统一方法
-### 初始化
+##统一方法
+###初始化
 ```php
 <?php
 
@@ -183,7 +183,7 @@ $payInstance = \xing\payment\drive\PayFactory::getInstance($payName)->init($conf
 $confing['openId'] = '用户openId';
 ```
 
-### 生成app签名
+###生成app签名
 ```php
 <?php
 // 单个
@@ -202,7 +202,7 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam([
 ```
 
 
-### 异步通知
+###异步通知
 ```php
 <?php
 // 如无特别说明，传递的参数都是是$_POST，但有些支付厂商不能使用$_POST，如paypal，微信等，请参考获取异步通知参数说明
@@ -210,7 +210,7 @@ if (!$payInstance->validate($_POST))
     throw new \Exception('非法请求');
 ```
 
-### 退款
+###退款
 
 ```php
 <?php
@@ -222,18 +222,23 @@ $payInstance->set('订单号', '退款金额')->refund();
 $payInstance->customParams('自定义参数（字符串）');
 ```
 
-## 苹果内购
-### 苹果流程说明
+##苹果内购
+###苹果流程说明
 。
 
 整个支付流程建议为：
+
 1、如果需要跟踪客户订单或是保持和支付宝微信的支付流程一致，可以先在服务端生成订单信息，并返回orderinfo参数，客户端保存好订单号。否则这一步可以跳过。
+
 2、客户端发起购买
+
 3、用户确认并支付
+
 4、支付成功后，客户端保存成功的数据，向服务端发送receipt数据以及订单号
+
 5、服务端根据服务端数据库的订单状态或保存的receipt原始订单id来判断是否使用过，避免刷单，如未使用，则发起验证，验证通过保存receipt为已使用。
 
-### 苹果配置
+###苹果配置
 ```php
 <?php
 
@@ -243,7 +248,7 @@ $appleSet = [
 ];
 ```
 
-### 苹果获取订单参数
+###苹果获取订单参数
 说明：和支付宝，微信的生成app签名的方法一样，不同的是，第4个参数为产品id，这样可以使后端一套代码应付多个支付平台，并且使苹果内购支付前的流程和支付宝微信相似。
 ```php
 <?php
@@ -251,7 +256,7 @@ $appleSet = [
 $orderInfo = $payInstance->set('订单号', '金额', '', '产品id')->getAppParam();
 ```
 
-### 苹果漏单处理
+###苹果漏单处理
 有三个步骤有可能造成漏单：
 
 1、服务端并不能保证100%在线。
@@ -264,8 +269,8 @@ $orderInfo = $payInstance->set('订单号', '金额', '', '产品id')->getAppPar
 
 客户端保存支付成功数据，在未得到服务成功的信号前，一直存在，并有不断重启请求任务的机制，并且app重启也能重启此任务。
 
-## 支付宝
-### 支付宝配置
+##支付宝
+###支付宝配置
 ```php
 <?php
 
@@ -280,7 +285,7 @@ $aliConfig = [
      'rsaPrivateKey' => '支付宝私钥（字符串），详情请查看支付宝生成私钥的文档',
  ];
 ```
-### 支付宝获取异步通知参数
+###支付宝获取异步通知参数
 ```php
 <?php
 $params = $_POST['passback_params']; // 自定义参数
@@ -288,9 +293,9 @@ $orderSn = $_POST['out_trade_no']; // 订单号
 $payMoney = $_POST['total_amount']; // 支付金额
 ```
 
-## 微信/小程序
+##微信/小程序
 微信和小程序的配置和流程是可以共用的，只需要在生成支付sign的时候使用getMiniProgramParam方法即可（需要要在配置加上用户openId，详细见[生成签名](#统一方法)
-### 微信配置
+###微信配置
 ```php
 <?php
 
@@ -307,7 +312,7 @@ $wechatConfig = [
 
 ```
 
-### 微信获取异步通知参数
+###微信获取异步通知参数
 ```php
 <?php
 
@@ -319,7 +324,7 @@ $drive = $post['attach'] ?? '';
 $orderSn = $post['out_trade_no'];
 ```
 
-### 微信分转换为元
+###微信分转换为元
 ```php
 <?php
 # 获取微信异步通知传来的参数
@@ -327,10 +332,10 @@ $post = $payInstance->getNotifyParams();
 # 获取和订单一致的支付金额（将分转为元）
 $payMoney = $payInstance->centsToYuan($post['total_fee']);
 ```
-## 微信
+##微信
 
-## paypal
-### payPal配置
+##paypal
+###payPal配置
 ```php
 <?php
 $config = [
@@ -339,13 +344,13 @@ $config = [
     'sandbox' => false, // 是否开启沙箱模式
 ];
 ```
-### payPal获取异步通知参数
+###payPal获取异步通知参数
 ```php
 <?php
 $requestBody = file_get_contents('php://input');
 ```
-# payssion
-### payssion配置
+#payssion
+###payssion配置
 ```php
 <?php
 $set = [
@@ -354,11 +359,11 @@ $set = [
 ];
 ```
 
-## 银联
-### 银联说明
+##银联
+###银联说明
 
 手机控件支付：银联需要先获取流水号再返回给前端app，app支付成功后才能成功接收银联的异步通知结果。
-### 银联配置
+###银联配置
 
 ```php
 <?php
@@ -390,7 +395,7 @@ $config = [
  */
 ```
 
-### 获取银联流水号
+###获取银联流水号
 ```php
 <?php
 
@@ -403,8 +408,8 @@ try {
 }
 ```
 
-# 首信易支付
-### 首信易配置
+#首信易支付
+###首信易配置
 ```php
 <?php
 $conifg = [
@@ -416,7 +421,7 @@ $conifg = [
 ```
 
 
-### 首信易异步通知
+###首信易异步通知
 ```php
 <?php
 
