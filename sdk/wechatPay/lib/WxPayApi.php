@@ -108,7 +108,7 @@ class WxPayApi
         $prePayParams['nonceStr']	= $result['nonce_str'];
         $prePayParams['package']	= $pack;
         $prePayParams['timeStamp']	= $time_stamp;
-        if ($inputObj->GetTrade_type() == "APP") $prePayParams['signType'] = 'MD5';
+        if ($inputObj->GetTrade_type() != "APP") $prePayParams['signType'] = 'MD5';
 //        $prePayParams['paySign'] = $inputObj->SetSign($prePayParams);
         //echo json_encode($prePayParams);
         $result = WxPayResults::InitFromArray($prePayParams,true)->GetValues();
