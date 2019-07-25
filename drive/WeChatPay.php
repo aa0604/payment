@@ -115,7 +115,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $this->payObject->SetTime_start(date("YmdHis"));
         $this->payObject->SetTime_expire(date("YmdHis", time() + 600));
         $this->payObject->SetNotify_url($this->notifyUrl);
-        $this->payObject->SetTrade_type("APP");
+        $this->payObject->SetTrade_type('APP');
         $this->payObject->SetNotify_url($this->notifyUrl);//异步通知url
         return $this;
     }
@@ -137,6 +137,13 @@ class WeChatPay implements \xing\payment\core\PayInterface
 
     public function getAppParam()
     {
+        $return = WxPayApi::appUnifiedOrder($this->payObject, 15);
+        return json_encode($return);
+    }
+    
+    public function getMiniProgramParam()
+    {
+        $this->payObject->SetTrade_type('JSAPI');
         $return = WxPayApi::appUnifiedOrder($this->payObject, 15);
         return json_encode($return);
     }

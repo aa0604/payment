@@ -1,15 +1,31 @@
 # 概要
+支持支付宝支付、微信支付、IOS苹果内购、payPal支付、银联、首信易，payssion支付
+
+可生成支付宝、微信app、小程序签名（小程序签名使用另外的方法）
+
 本库使用interface规范，工厂模式编写，代码质量高，统一规范。
 
 简单说好处就是，在控制器里，你只需要写几行代码，你就可以对接多个支付。想要做到这一点，需要前端向传递服务端使用哪个支付驱动代码，服务端再根据支付驱动代码去调用相应的支付程序。
 
 美中不足的是，部分代码是用php7的新特性写的，不兼容老版本的，我们做开发的特别是新项目自然是要走在技术的前端才对。
 
+
+# 支付宝、微信APP支付流程（其他第三方支付流程也类似，有的会不同，详细有什么不同可以到github上面给我留言，我收到后有空时会补充说明）
+1、生成签名，设置回调地址（回调地址在配置中设置）
+
+2、app收到签名后向用户发起支付
+
+3、支付成功后支付宝/微信会向你配置的回调地址发起付款成功的通知
+
+4、后端服务器收到成功付款的通知后，运行支付成功后的业务代码
+
+
 # 目录
 * [安装](#安装)
 * [支付驱动代码列表](#支付驱动代码列表)
     * [支付宝支付](#支付宝支付)
     * [微信支付](#微信支付)
+    * [小程序支付](#小程序支付)
     * [首信易支付](#首信易支付)
     * [银联](#银联)
     * [PaySsion](#PaySsion)
@@ -29,7 +45,7 @@
 * [支付宝](#支付宝)
     * 支付宝配置
     * 支付宝获取异步通知参数
-* [微信](#微信)
+* [微信/小程序](#微信/小程序)
     * 微信配置
     * 微信获取异步通知参数
     * 微信分转换为元
@@ -52,7 +68,7 @@
 
 2、主要功能：全部支持支付和验证异步通知
 
-3、支付宝、微信：可生成app签名，可原路退款
+3、支付宝、微信、微信JSAPI支付：可生成app签名，可原路退款
 
 4、通过工厂服务可以一次调用出所有支持的支付平台的app参数
 
@@ -66,6 +82,8 @@ composer require xing.chen/payment dev-master
 #### 支付宝支付
 aliPay
 #### 微信支付
+weChatPay
+#### 小程序支付
 weChatPay
 #### 首信易支付
 BeijinPay
@@ -84,7 +102,9 @@ ApplePay
 <?php
 
 $payName = '支付驱动代码'; // 支付驱动代码
-$payInstance = \xing\payment\drive\PayFactory::getInstance($payName)->init('支付驱动 的配置，详情看配置篇');
+$payInstance = \xing\payment\drive\PayFactory::getInstance($payName)->init($confing); //支付驱动 的配置，详情看配置篇，小程序需要在微信支付配置的基础上多加openId 
+// 小程序、公众号支付等JSAPI需要额外加上用户openId
+$confing['openId'] = '用户openId';
 ```
 
 ### 生成app签名
@@ -93,11 +113,16 @@ $payInstance = \xing\payment\drive\PayFactory::getInstance($payName)->init('支�
 // 单个
 $sign = $payInstance->set('订单号', '金额', '支付标题（商品名）')->getAppParam();
 
+// 微信小程序、公众号、网页支付等和JSAPI有关的支付生成签名方法为：
+$sign = $payInstance->set('订单号', '金额', '支付标题（商品名）')->getMiniProgramParam();
+
 // 同时获取微信和支付的app支付签名
 $payChannel= \xing\payment\drive\PayFactory::getAppsParam([
     'aliPay' => $aliConfig,
     'weChatPay' => $wechatConfig
 ], '订单号', '金额', '支付标题（商品名）');
+
+
 ```
 
 ### 异步通知
@@ -186,7 +211,8 @@ $orderSn = $_POST['out_trade_no']; // 订单号
 $payMoney = $_POST['total_amount']; // 支付金额
 ```
 
-## 微信
+## 微信/小程序
+微信和小程序的配置和流程是可以共用的，只需要在生成支付sign的时候使用getMiniProgramParam方法即可（需要要在配置加上用户openId，详细见[生成签名](#统一方法)
 ### 微信配置
 ```php
 <?php

@@ -93,14 +93,13 @@ class WxPayApi
         $startTimeStamp = self::getMillisecond();//请求开始时间
         $response = self::postXmlCurl($xml, $url, false, $timeOut);
         $result = WxPayResults::Init($response);
+        if (isset($result['return_code']) && $result['return_code'] == 'FAIL') throw new \Exception($result['return_msg']);
 //		self::reportCostTime($url, $startTimeStamp, $result);//上报请求花费时间
 
         // 统一下单接口返回正常的prepay_id，再按签名规范重新生成签名后，将数据传输给APP。
         // 参与签名的字段名为appId，partnerId，prepayId，nonceStr，timeStamp，package。注意：package的值格式为Sign=WXPay
         $time_stamp = time();
-        $pack	= 'Sign=WXPay';
-        // 兼容小程序
-        if (defined('PAY_NAME') && PAY_NAME == 'wxMiniProgram') $pack = 'prepay_id=' . $result['prepay_id'];
+        $pack	= $inputObj->GetTrade_type() == "APP" ? 'Sign=WXPay' : 'prepay_id=' . $result['prepay_id'];
         //输出参数列表
         $prePayParams =array();
         $prePayParams['appid']		=$result['appid'];

@@ -1,6 +1,6 @@
 {
     "name": "xing.chen/payment",
-    "description": "支持IOS苹果内购、支付宝支付、微信支付、payPal支付、银联、首信易，payssion支付，可生成支付宝、微信app签名",
+    "description": "支持支付宝支付、微信支付、小程序支付、IOS苹果内购、payPal支付、银联、首信易，payssion支付，可生成支付宝、微信app、小程序签名",
     "license": "MIT",
     "authors": [
         {
