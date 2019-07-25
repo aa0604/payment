@@ -22,6 +22,7 @@
 
 # 目录
 * [安装](#安装)
+* [业务代码示例](#业务代码示例)
 * [支付驱动代码列表](#支付驱动代码列表)
     * [支付宝支付](#支付宝支付)
     * [微信支付](#微信支付)
@@ -76,6 +77,59 @@
 ## 安装
 composer require xing.chen/payment dev-master
 
+# 业务代码示例
+### 获取签名示例代码
+```php
+<?php
+
+try {
+    $payName = $_POST['payName']; // 支付驱动代码，表示前端想启动哪个支付驱动
+    $module = $_POST['module']; // 自定义参数，我这里标记为模块，比如vip，代表购买vip服务，在异步通知时通过这个参数知道这个是什么类型的订单
+    if (empty($payName)) throw new \Exception('缺少支付驱动代码参数');
+    
+    $orderSn = '商家订单号';
+    $title = '商品名称';
+    $body = $payName == 'ApplePay' ? '商品id' : '商品名称或商品描述';
+    // 获取配置
+    $config = [
+        'aliPay' => [
+            'appId' => '',
+            'notifyUrl' => 'https://api.xxx.com/payment/ali-pay/notify',
+            'alipayrsaPublicKey' => '',
+            'rsaPrivateKey' => '',
+        ],
+        'weChatPay' => [
+            'appId' => '', 
+            'mchId' => '',
+            'notifyUrl' => 'https://api.xxx.com/payment/wx-pay/notify',
+        ],
+        'ApplePay' => [
+            'sandbox' => false,
+            'secret' => '',
+        ],
+    ];
+    $set = $config[$payName] ?? null;
+    if (empty($set)) throw new \Exception('读取支付设置失败，payName = ' . $payName);
+
+    $service = \xing\payment\drive\PayFactory::getInstance($payName)
+        ->init($set)
+        ->customParams($module)
+        ->set($orderSn, $amount, $title, $body, $intOrderSn);
+    
+    // 如果是微信JSAPI支付
+    if ($payName == 'wxMiniProgram') {
+        $openId = '微信用户openId';
+        $set['openId'] = $openId;
+        $service->init($set)->getMiniProgramParam();
+    } else {
+        $paySign = $service->getAppParam();
+    }
+
+
+} catch (\Exception $e) {
+    exit($e->getMessage());
+}
+```
 ## 支付驱动代码列表
 说明：在此方法传递参数时传入此代码即调用相应的支付驱动
 \xing\payment\drive\PayFactory::getInstance('支付驱动代码')
@@ -124,6 +178,7 @@ $payChannel= \xing\payment\drive\PayFactory::getAppsParam([
 
 
 ```
+
 
 ### 异步通知
 ```php
