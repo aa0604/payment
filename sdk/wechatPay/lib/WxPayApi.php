@@ -102,14 +102,17 @@ class WxPayApi
         $pack	= $inputObj->GetTrade_type() == "APP" ? 'Sign=WXPay' : 'prepay_id=' . $result['prepay_id'];
         //输出参数列表
         $prePayParams =array();
-        $prePayParams['appid']		=$result['appid'];
-        $prePayParams['partnerid']	=$result['mch_id'];
-        $prePayParams['prepayid']	=$result['prepay_id'];
-        $prePayParams['noncestr']	=$result['nonce_str'];
-        $prePayParams['package']	=$pack;
-        $prePayParams['timestamp']	=$time_stamp;
+        $prePayParams['appId']		= $result['appid'];
+        if ($inputObj->GetTrade_type() == "APP") $prePayParams['partnerid']	= $result['mch_id'];
+        if ($inputObj->GetTrade_type() == "APP") $prePayParams['prepay_id']	= $result['prepay_id'];
+        $prePayParams['nonceStr']	= $result['nonce_str'];
+        $prePayParams['package']	= $pack;
+        $prePayParams['timeStamp']	= $time_stamp;
+        if ($inputObj->GetTrade_type() == "APP") $prePayParams['signType'] = 'MD5';
+//        $prePayParams['paySign'] = $inputObj->SetSign($prePayParams);
         //echo json_encode($prePayParams);
         $result = WxPayResults::InitFromArray($prePayParams,true)->GetValues();
+
 
         return $result;
     }
