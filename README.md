@@ -36,6 +36,8 @@
 # 目录
 * [安装](#安装)
 * [业务代码示例](#业务代码示例)
+    * [签名示例代码](#获取签名示例代码)
+    * [异步通知示例代码](#异步通知示例代码)
 * [支付驱动代码列表](#支付驱动代码列表)
     * [支付宝支付](#支付宝支付)
     * [微信支付](#微信支付)
@@ -123,7 +125,7 @@ try {
     if ($payName == 'wxMiniProgram') {
         $openId = '微信用户openId';
         $set['openId'] = $openId;
-        $service->init($set)->getMiniProgramParam();
+        $paySign = $service->init($set)->getMiniProgramParam();
     } else {
         $paySign = $service->getAppParam();
     }
@@ -133,6 +135,23 @@ try {
     exit($e->getMessage());
 }
 ```
+
+###异步通知示例代码
+本例为支付宝异步通知，其他支付驱动请查看详细文档自行码
+```php
+<?php
+
+try {
+    $payName = 'aliPay';
+    $set = PaymentSetMap::getSet($payName);
+    if (!PayFactory::getInstance($payName)->init($set)->validate($_POST)) throw new \Exception('验证失败');
+    exit('success');
+} catch (\Exception $e) {
+    exit('fail');
+}
+```
+
+
 ## 支付驱动代码列表
 说明：在此方法传递参数时传入此代码即调用相应的支付驱动
 \xing\payment\drive\PayFactory::getInstance('支付驱动代码')
