@@ -1,6 +1,6 @@
 ### 更新说明
 
-app签名的键名改变了三个，之前是全小写，现改为驼峰（nonceStr，timeStamp，appId），可能会影响到app端支付，版本dev-master依旧不变
+app签名的键名改变了三个，之前是全小写，现改为驼峰（nonceStr，timeStamp，appId），可能会影响到app端支付
 
 # 概要
 支持支付宝支付、微信支付、IOS苹果内购、payPal支付、银联、首信易，payssion支付
