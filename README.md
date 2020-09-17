@@ -3,9 +3,11 @@
 app签名的键名改变了三个，之前是全小写，现改为驼峰（nonceStr，timeStamp，appId）
 
 # 概要
-支持支付宝支付、微信支付、IOS苹果内购、payPal支付、银联、首信易，payssion支付
+支持支付宝支付、微信支付、IOS苹果内购、payPal支付、银联、首信易，payssion支付，头条/字节跳动
 
 可生成支付宝、微信app、小程序签名（小程序签名使用另外的方法）
+
+可生成微信/头条/字节跳动所需的orderInfo，字节跳动可传入支付宝、微信配置生成alipay_url || wx_url，使用方法和生成签名参数一样
 
 本库使用interface规范，工厂模式编写，代码质量高，统一规范。
 
@@ -40,7 +42,7 @@ app签名的键名改变了三个，之前是全小写，现改为驼峰（nonce
 # 目录
 * [安装](#安装)
 * [业务代码示例](#业务代码示例)
-    * [签名示例代码](#获取签名示例代码)
+    * [签名/参数获取示例代码](#签名/参数获取示例代码)
     * [异步通知示例代码](#异步通知示例代码)
 * [支付驱动代码列表](#支付驱动代码列表)
     * [支付宝支付](#支付宝支付)
@@ -51,9 +53,10 @@ app签名的键名改变了三个，之前是全小写，现改为驼峰（nonce
     * [PaySsion](#PaySsion)
     * [PayPal](#PayPal)
     * [苹果支付](#苹果支付)
+    * [字节跳动代码](#字节跳动代码)
 * [统一方法](#统一方法)
     * 初始化
-    * 生成app签名
+    * 生成app签名/参数
     * 异步通知
     * 退款（原路退回）
     * 设置自定义参数
@@ -69,6 +72,9 @@ app签名的键名改变了三个，之前是全小写，现改为驼峰（nonce
     * 微信配置
     * 微信获取异步通知参数
     * 微信分转换为元
+* [字节跳动](#字节跳动)
+    * 配置
+    * 分转换为元
 * [paypal](#paypal)
     * payPal配置
     * payPal获取异步通知参数
@@ -87,37 +93,16 @@ app签名的键名改变了三个，之前是全小写，现改为驼峰（nonce
 composer require xing.chen/payment dev-master
 
 # 业务代码示例
-### 获取签名示例代码
+### 签名/参数获取示例代码
 ```php
 <?php
 
-try {
-    $payName = $_POST['payName']; // 支付驱动代码，表示前端想启动哪个支付驱动
-    $module = $_POST['module']; // 自定义参数，我这里标记为模块，比如vip，代表购买vip服务，在异步通知时通过这个参数知道这个是什么类型的订单
-    if (empty($payName)) throw new \Exception('缺少支付驱动代码参数');
-    
+    $payName = 'WeChatPay'; // 支付驱动代码
     $orderSn = '商家订单号';
     $title = '商品名称';
     $body = $payName == 'ApplePay' ? '商品id' : '商品名称或商品描述';
-    // 获取配置
-    $config = [
-        'aliPay' => [
-            'appId' => '',
-            'notifyUrl' => 'https://api.xxx.com/payment/ali-pay/notify',
-            'alipayrsaPublicKey' => '',
-            'rsaPrivateKey' => '',
-        ],
-        'weChatPay' => [
-            'appId' => '', 
-            'mchId' => '',
-            'notifyUrl' => 'https://api.xxx.com/payment/wx-pay/notify',
-        ],
-        'ApplePay' => [
-            'sandbox' => false,
-            'secret' => '',
-        ],
-    ];
-    $set = $config[$payName] ?? null;
+    // 配置
+    $set = [...]; // 配置，请参阅配置章节
     if (empty($set)) throw new \Exception('读取支付设置失败，payName = ' . $payName);
 
     $payInstance = \xing\payment\drive\PayFactory::getInstance($payName)
@@ -129,15 +114,10 @@ try {
     if ($payName == 'wxMiniProgram') {
         $openId = '微信用户openId';
         $set['openId'] = $openId;
-        $paySign = $payInstance->init($set)->getMiniProgramParam();
-    } else {
-        $paySign = $payInstance->getAppParam();
+        $orderInfo = $paySign = $payInstance->getMiniProgramParam();
+    } else { // 其他
+        $orderInfo = $paySign = $payInstance->getAppParam();
     }
-
-
-} catch (\Exception $e) {
-    exit($e->getMessage());
-}
 ```
 
 ### 异步通知示例代码
@@ -146,7 +126,7 @@ try {
 <?php
 
 try {
-    $payName = 'aliPay';
+    $payName = 'AliPay';
     $set = PaymentSetMap::getSet($payName);
     if (!PayFactory::getInstance($payName)->init($set)->validate($_POST)) throw new \Exception('验证失败');
     exit('success');
@@ -160,11 +140,11 @@ try {
 说明：在此方法传递参数时传入此代码即调用相应的支付驱动
 \xing\payment\drive\PayFactory::getInstance('支付驱动代码')
 #### 支付宝支付
-aliPay
+AliPay
 #### 微信支付
-weChatPay
+WeChatPay
 #### 小程序支付
-weChatPay
+WeChatPay
 #### 首信易支付
 BeijinPay
 #### 银联
@@ -175,6 +155,8 @@ PaySsion
 PayPal
 #### 苹果支付
 ApplePay
+#### 字节跳动代码
+TuoTiaoPay
 
 ## 统一方法
 ### 初始化
@@ -198,8 +180,8 @@ $sign = $payInstance->set('订单号', '金额', '支付标题（商品名）')-
 
 // 同时获取微信和支付的app支付签名
 $payChannel= \xing\payment\drive\PayFactory::getAppsParam([
-    'aliPay' => $aliConfig,
-    'weChatPay' => $wechatConfig
+    'AliPay' => $aliConfig,
+    'WeChatPay' => $wechatConfig
 ], '订单号', '金额', '支付标题（商品名）');
 
 
@@ -336,8 +318,14 @@ $post = $payInstance->getNotifyParams();
 # 获取和订单一致的支付金额（将分转为元）
 $payMoney = $payInstance->centsToYuan($post['total_fee']);
 ```
-## 微信
-
+## 字节跳动
+```php
+$config = [
+            'merchant_id' => '商户号',
+            'app_id' => 'appId',
+            'secret' => '密钥',
+];
+```
 ## paypal
 ### payPal配置
 ```php

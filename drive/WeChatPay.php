@@ -137,14 +137,14 @@ class WeChatPay implements \xing\payment\core\PayInterface
 
     public function getAppParam()
     {
-        $return = WxPayApi::appUnifiedOrder($this->payObject, 15);
+        $return = WxPayApi::appUnifiedOrder($this->payObject, 60);
         return json_encode($return);
     }
     
     public function getMiniProgramParam()
     {
         $this->payObject->SetTrade_type('JSAPI');
-        $return = WxPayApi::appUnifiedOrder($this->payObject, 15);
+        $return = WxPayApi::appUnifiedOrder($this->payObject, 60);
         return json_encode($return);
     }
 

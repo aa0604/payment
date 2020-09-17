@@ -13,19 +13,20 @@ namespace xing\payment\drive;
 class PayFactory
 {
     private static $payDrive = [
-        'aliPay' => '\xing\payment\drive\AliPay',
-        'weChatPay' => '\xing\payment\drive\WeChatPay',
+        'AliPay' => '\xing\payment\drive\AliPay',
+        'WeChatPay' => '\xing\payment\drive\WeChatPay',
         'BeijinPay' => '\xing\payment\drive\BeijinPay',
         'UnionPay' => '\xing\payment\drive\UnionPay',
         'PaySsion' => '\xing\payment\drive\PaySsion',
         'PayPal' => '\xing\payment\drive\PayPal',
         'ApplePay' => '\xing\payment\drive\ApplePay',
+        'tuoTiao' => '\xing\payment\drive\TouTiaoPay'
     ];
 
     /**
      * 返回单例
      * @param $payInstanceName
-     * @return AliPay|WeChatPay|ApplePay|BeijinPay|UnionPay|PaySsion|PayPal
+     * @return AliPay|WeChatPay|ApplePay|BeijinPay|UnionPay|PaySsion|PayPal|TouTiaoPay
      */
     public static function getInstance($payInstanceName)
     {
