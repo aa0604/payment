@@ -161,8 +161,11 @@ class AliPay implements \xing\payment\core\PayInterface
     public function refund($reason = '正常退款')
     {
         # 设置退款金额
+//        $this->params($this->params['total_amount']);
         $this->params(['refund_amount' => $this->params['total_amount']]);
-        unset($this->params['total_amount']);
+        // 部分退款唯一订单号
+        $this->params(['out_request_no' => $this->params['out_trade_no']]);
+        unset($this->params['total_amount'], $this->params['out_trade_no']);
 
         # 获取驱动
         $request = new \xing\payment\sdk\aliPay\aop\request\AlipayTradeRefundRequest();

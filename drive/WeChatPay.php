@@ -28,10 +28,11 @@ class WeChatPay implements \xing\payment\core\PayInterface
     public $returnUrl = '同上，可空';
 
     private $config;
-    private $payObject;
+    public $payObject;
 
     private $orderSn;
     private $amount;
+    private $params = [];
 
 
     public static function init($config)
@@ -117,11 +118,13 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $this->payObject->SetNotify_url($this->notifyUrl);
         $this->payObject->SetTrade_type('APP');
         $this->payObject->SetNotify_url($this->notifyUrl);//异步通知url
+        $this->params['intOrderSn'] = $intOrderSn;
         return $this;
     }
 
     public function params(array $params)
     {
+        $this->params = $params;
         return $this;
     }
 
@@ -133,6 +136,13 @@ class WeChatPay implements \xing\payment\core\PayInterface
     {
         $this->payObject->SetAttach($value);
         return $this;
+    }
+
+
+    public function getH5Param()
+    {
+        $return = WxPayApi::unifiedOrder($this->payObject, 60);
+        return json_encode($return);
     }
 
     public function getAppParam()
@@ -174,8 +184,9 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $input->SetOut_trade_no($this->orderSn);
         $input->SetTotal_fee($this->amount);
         $input->SetRefund_fee($this->amount);
-        $input->SetOut_refund_no($this->config['mchId'].date("YmdHis"));
         $input->SetOp_user_id($this->config['mchId']);
+        $intOrderSn = $this->params['intOrderSn'] ?? $this->config['mchId'].date("YmdHis");
+        $input->SetOut_refund_no($this->params['intOrderSn']);
         $result = WxPayApi::refund($input);
         return isset($result['return_code']) && $result['return_code'] == 'SUCCESS';
     }

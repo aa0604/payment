@@ -141,7 +141,7 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
             'merchant_id' => $this->merchant_id,
             'app_id' => $this->app_id,
             'sign_type' => $this->sign_type,
-            'timestamp' => time(),
+            'timestamp' => (string) time(),
             'version' => $this->version,
             'trade_type' => $this->trade_type,
             'product_code' => 'pay',
@@ -152,16 +152,15 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
             'currency' => 'CNY',
             'subject' => $this->title,
             'body' => $this->body,
-            'trade_time' => $this->tradeTime ?: time(),
-            'valid_time' => $this->valid_time,
+            'trade_time' => (string) ($this->tradeTime ?: time()),
+            'valid_time' => (string) $this->valid_time,
             'notify_url' => $this->notifyUrl,
-            'risk_info' => $_SERVER['REMOTE_ADDR'] ?? '',
+            'risk_info' => json_encode(['ip' => $_SERVER['REMOTE_ADDR'] ?? '']),
         ];
 
         // 设置第三方支付url参数
         if (!empty($this->serviceType)) {
-            
-            $this->payObject->SetTrade_type('MWEB');
+
             $service = \xing\payment\drive\PayFactory::getInstance($this->serviceType)
                 ->init($this->otherSet)
                 ->set($this->orderSn, $this->centsToYuan($this->amount), $this->title, $this->body);
@@ -174,12 +173,12 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
                 case 'WeChatPay':
                     $post['wx_type'] = 'MWEB';
                     $service->payObject->SetTrade_type($post['wx_type']);
-                    $params = $service->getAppParam();
-                    $post['wx_url'] = $params;
+                    $result = $service->getH5Param();
+                    $params = json_decode($result, 1);
+                    $post['wx_url'] = $params['mweb_url'] ?? '';
                     break;
             }
         }
-
         $post['sign'] = $this->sign($post);
         return $post;
     }
@@ -187,6 +186,7 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
     private function sign($post)
     {
 
+        unset($post['risk_info']);
         ksort($post);
         $string = '';
         foreach ($post as $k => $v) $string .= '&' . $k . '=' . $v;
