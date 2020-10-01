@@ -16,12 +16,20 @@ namespace xing\payment\drive;
 use xing\payment\sdk\aliPay\aop\AopClient;
 use xing\payment\sdk\aliPay\aop\request\AlipayTradeAppPayRequest;
 
+/**
+ * Class AliPay
+ * @property string $notifyUrl
+ * @property string $notifyRefundUrl
+ * @property string $returnUrl
+ * @property string $config
+ * @package xing\payment\drive
+ */
 class AliPay implements \xing\payment\core\PayInterface
 {
 
-    public $notifyUrl = '通过设置 init 方法的参数$config[notifyUrl] 来设置';
-    public $returnUrl = '同上，可空';
-    public $notifyRefundUrl = '退款通知网址';
+    public $notifyUrl = '';
+    public $returnUrl = '';
+    public $notifyRefundUrl = '';
 
     private $config;
 
@@ -43,6 +51,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $class->config = $config;
         $class->notifyUrl = $config['notifyUrl'];
         $class->returnUrl = $config['returnUrl'] ?? '';
+        $class->notifyRefundUrl = $config['notifyRefundUrl'] ?? '';
         defined('AOP_SDK_WORK_DIR') ?: define("AOP_SDK_WORK_DIR", $config['logDir'] ?? sys_get_temp_dir() . '/');
 
 //        初始化支付宝和配置参数
@@ -82,7 +91,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $this->params['out_trade_no'] = $outOrderSn;
         $this->params['body'] = $body;
         $this->params['subject'] = $title;
-        $this->params['total_amount'] = $amount;
+        $this->params['total_amount'] = number_format($amount, 2);
 //        $this->params['timeout_express'] = '30m';
         return $this;
     }
@@ -166,6 +175,7 @@ class AliPay implements \xing\payment\core\PayInterface
         // 部分退款唯一订单号
         $this->params(['out_request_no' => $this->params['out_trade_no']]);
         unset($this->params['total_amount'], $this->params['out_trade_no']);
+        if (empty($this->notifyRefundUrl)) throw new \Exception('未设置退款异步通知url');
 
         # 获取驱动
         $request = new \xing\payment\sdk\aliPay\aop\request\AlipayTradeRefundRequest();

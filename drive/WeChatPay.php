@@ -16,6 +16,7 @@ use xing\payment\sdk\wechatPay\WxPayUnifiedOrder;
  * Class WeChatPay
  * @property WxPayUnifiedOrder $payObject
  * @property string $notifyUrl
+ * @property string $notifyRefundUrl
  * @property string $returnUrl
  * @property string $config
  * @package xing\payment\drive
@@ -39,9 +40,12 @@ class WeChatPay implements \xing\payment\core\PayInterface
     {
 
         $class = new self();
+
         $class->config = $config;
         $class->notifyUrl = $config['notifyUrl'];
         $class->returnUrl = $config['returnUrl'] ?? '';
+        $class->notifyRefundUrl = $config['notifyRefundUrl'] ?? '';
+
         $class->payObject = new WxPayUnifiedOrder();
         $class->payObject->SetOpenid($class->config['openId'] ?? '');
         $class->payObject->SetAppid($class->config['appId']);//公众账号ID
@@ -117,7 +121,6 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $this->payObject->SetTime_expire(date("YmdHis", time() + 600));
         $this->payObject->SetNotify_url($this->notifyUrl);
         $this->payObject->SetTrade_type('APP');
-        $this->payObject->SetNotify_url($this->notifyUrl);//异步通知url
         $this->params['intOrderSn'] = $intOrderSn;
         return $this;
     }
@@ -185,6 +188,10 @@ class WeChatPay implements \xing\payment\core\PayInterface
         $input->SetTotal_fee($this->amount);
         $input->SetRefund_fee($this->amount);
         $input->SetOp_user_id($this->config['mchId']);
+
+        if (empty($this->notifyRefundUrl)) throw new \Exception('未设置退款通知url');
+        $this->payObject->SetNotify_url($this->notifyRefundUrl);
+
         $intOrderSn = $this->params['intOrderSn'] ?? $this->config['mchId'].date("YmdHis");
         $input->SetOut_refund_no($this->params['intOrderSn']);
         $result = WxPayApi::refund($input);
