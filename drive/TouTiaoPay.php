@@ -20,6 +20,7 @@ namespace xing\payment\drive;
  * @property int $valid_time
  * @property array $otherSet
  * @property string $serviceType
+ * @property array|string $customParam
  * @package xing\payment\drive
  */
 class TouTiaoPay implements \xing\payment\core\PayInterface
@@ -37,6 +38,7 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
     public $valid_time = 86400;
     private $otherSet;
     private $serviceType;
+    private $customParam;
 
     public static function init($config)
     {
@@ -65,6 +67,16 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
         $this->amount = $this->yuanToCents($money);
         $this->title = $title;
         $this->body = $body;
+        return $this;
+    }
+
+    /**
+     * @param $value
+     * @return $this
+     */
+    public function customParams($value)
+    {
+        $this->customParam = $value;
         return $this;
     }
 
@@ -99,16 +111,6 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
     {
         foreach ($params as $k => $v) $this->$k = $v;
         return $this;
-    }
-
-    /**
-     * 设置自定义参数
-     * @param $value
-     * @return $this
-     */
-    public function customParams($value)
-    {
-
     }
 
     /**
@@ -163,6 +165,7 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
 
             $service = \xing\payment\drive\PayFactory::getInstance($this->serviceType)
                 ->init($this->otherSet)
+                ->customParams($this->customParam)
                 ->set($this->orderSn, $this->centsToYuan($this->amount), $this->title, $this->body);
             
             switch ($this->serviceType) {
