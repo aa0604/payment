@@ -75,7 +75,7 @@ app签名的键名改变了三个，之前是全小写，现改为驼峰（nonce
     * 微信分转换为元
 * [字节跳动](#字节跳动)
     * 配置
-    * 分转换为元
+    * 获取支付宝或微信url
 * [paypal](#paypal)
     * payPal配置
     * payPal获取异步通知参数
@@ -156,7 +156,7 @@ PaySsion
 PayPal
 #### 苹果支付
 ApplePay
-#### 字节跳动代码
+#### 字节跳动
 TuoTiaoPay
 
 ## 统一方法
@@ -325,12 +325,18 @@ $post = $payInstance->getNotifyParams();
 $payMoney = $payInstance->centsToYuan($post['total_fee']);
 ```
 ## 字节跳动
+### 配置
 ```php
 $config = [
             'merchant_id' => '商户号',
             'app_id' => 'appId',
             'secret' => '密钥',
 ];
+```
+### 支付宝和微信的返回参加获取
+```php
+// 传入支付宝或微信驱动代码，返回的数据就会包含alipay_url或wx_url相关参数
+$orderInfo = $payInstance->setService('AliPay或WeChatPay')->getAppParam();
 ```
 ## paypal
 ### payPal配置
