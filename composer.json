@@ -9,7 +9,7 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "paypal/rest-api-sdk-php": "^1.12",
+        "firebase/php-jwt": "^6.4.0",
         "xing.chen/helper": "*"
     },
     "autoload": {

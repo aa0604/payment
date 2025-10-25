@@ -92,6 +92,7 @@ class WxPayResults extends \xing\payment\sdk\wechatPay\WxPayDataBase
         if($returnCode != 'SUCCESS'){
             return $obj->GetValues();
         }
+
         $obj->CheckSign();
         return $obj->GetValues();
     }

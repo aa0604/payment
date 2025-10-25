@@ -92,27 +92,38 @@ class WxPayApi
 
         $startTimeStamp = self::getMillisecond();//请求开始时间
         $response = self::postXmlCurl($xml, $url, false, $timeOut);
+
         $result = WxPayResults::Init($response);
         if (isset($result['return_code']) && $result['return_code'] == 'FAIL') throw new \Exception($result['return_msg']);
+        if (($result['result_code'] ?? '') == 'FAIL' && ($result['err_code'] ?? '') == 'PARAM_ERROR') {
+            throw new \Exception($result['err_code_des']);
+        }
 //		self::reportCostTime($url, $startTimeStamp, $result);//上报请求花费时间
 
         // 统一下单接口返回正常的prepay_id，再按签名规范重新生成签名后，将数据传输给APP。
         // 参与签名的字段名为appId，partnerId，prepayId，nonceStr，timeStamp，package。注意：package的值格式为Sign=WXPay
-        $time_stamp = time();
+        $time_stamp = (string) time();
         $pack	= $inputObj->GetTrade_type() == "APP" ? 'Sign=WXPay' : 'prepay_id=' . $result['prepay_id'];
         //输出参数列表
         $prePayParams =array();
-        $prePayParams['appId']		= $result['appid'];
-        if ($inputObj->GetTrade_type() == "APP") $prePayParams['partnerid']	= $result['mch_id'];
-        if ($inputObj->GetTrade_type() == "APP") $prePayParams['prepay_id']	= $result['prepay_id'];
-        $prePayParams['nonceStr']	= $result['nonce_str'];
+        if ($inputObj->GetTrade_type() == 'APP') {
+            $prePayParams['appid']		= $result['appid'];
+            $prePayParams['partnerid']	= $result['mch_id'];
+            $prePayParams['prepayid']	= $result['prepay_id'];
+            $prePayParams['timestamp']	= $time_stamp;
+	    $prePayParams['noncestr']	= $result['nonce_str'];
+        } else {
+            $prePayParams['appId']		= $result['appid'];
+            $prePayParams['timeStamp']	= $time_stamp;
+	    $prePayParams['nonceStr']	= $result['nonce_str'];
+
+        }
+
         $prePayParams['package']	= $pack;
-        $prePayParams['timeStamp']	= $time_stamp;
         if ($inputObj->GetTrade_type() != "APP") $prePayParams['signType'] = 'MD5';
 //        $prePayParams['paySign'] = $inputObj->SetSign($prePayParams);
         //echo json_encode($prePayParams);
         $result = WxPayResults::InitFromArray($prePayParams,true)->GetValues();
-
 
         return $result;
     }
@@ -555,7 +566,7 @@ class WxPayApi
 		if(array_key_exists("device_info", $data)){
 			$objInput->SetDevice_info($data["device_info"]);
 		}
-		
+
 		try{
 			self::report($objInput);
 		} catch (WxPayException $e){

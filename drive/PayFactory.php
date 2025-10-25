@@ -20,7 +20,7 @@ class PayFactory
         'PaySsion' => '\xing\payment\drive\PaySsion',
         'PayPal' => '\xing\payment\drive\PayPal',
         'ApplePay' => '\xing\payment\drive\ApplePay',
-        'tuoTiao' => '\xing\payment\drive\TouTiaoPay'
+        'TouTiao' => '\xing\payment\drive\TouTiaoPay'
     ];
 
     /**

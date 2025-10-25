@@ -3,11 +3,14 @@
 
 namespace xing\payment\drive;
 
+use xing\helper\resource\HttpHelper;
+
 /**
  * Class TouTiaoPay
  * @property string $merchant_id
  * @property string $app_id
- * @property string $secret
+ * @property string $token
+ * @property string $SALT
  * @property string $title
  * @property string $sign_type
  * @property string $trade_type
@@ -47,7 +50,8 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
         $class->config = $config;
         $class->merchant_id = $config['merchant_id'];
         $class->app_id = $config['app_id'];
-        $class->secret = $config['secret'];
+        $class->token = $config['token'];
+        $class->SALT = $config['SALT'];
 //        $class->notify_url = $config['notify_url'];
         return $class;
     }
@@ -131,7 +135,7 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
      */
     private function yuanToCents($yuan)
     {
-        return intval($yuan * 100);
+        return intval($yuan * 1000 / 10);
     }
     /**
      * 返回签名参数
@@ -140,34 +144,38 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
     public function getAppParam()
     {
         $post = [
-            'merchant_id' => $this->merchant_id,
             'app_id' => $this->app_id,
+            'out_order_no' => $this->orderSn,
+            'total_amount' => $this->amount,
+            'subject' => $this->title,
+            'body' => $this->body,
+            'valid_time' => $this->valid_time,
+            'sign' => '',
+            'cp_extra' => $this->customParam,
+            'notify_url' => $this->notifyUrl,
+            'disable_msg' => 0,
+            'msg_page' => ''
+            /*'merchant_id' => $this->merchant_id,
             'sign_type' => $this->sign_type,
             'timestamp' => (string) time(),
             'version' => $this->version,
             'trade_type' => $this->trade_type,
             'product_code' => 'pay',
             'payment_type' => 'direct',
-            'out_order_no' => $this->orderSn,
             'uid' => $this->app_id,
-            'total_amount' => $this->amount,
             'currency' => 'CNY',
-            'subject' => $this->title,
-            'body' => $this->body,
             'trade_time' => (string) ($this->tradeTime ?: time()),
-            'valid_time' => (string) $this->valid_time,
-            'notify_url' => $this->notifyUrl,
-            'risk_info' => json_encode(['ip' => $_SERVER['REMOTE_ADDR'] ?? '']),
+            'risk_info' => json_encode(['ip' => $_SERVER['REMOTE_ADDR'] ?? '']),*/
         ];
 
         // 设置第三方支付url参数
-        if (!empty($this->serviceType)) {
+        /*if (!empty($this->serviceType)) {
 
             $service = \xing\payment\drive\PayFactory::getInstance($this->serviceType)
                 ->init($this->otherSet)
                 ->customParams($this->customParam)
                 ->set($this->orderSn, $this->centsToYuan($this->amount), $this->title, $this->body);
-            
+
             switch ($this->serviceType) {
                 case 'AliPay';
                     $params = $service->getAppParam();
@@ -181,20 +189,60 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
                     $post['wx_url'] = $params['mweb_url'] ?? '';
                     break;
             }
-        }
-        $post['sign'] = $this->sign($post);
-        return $post;
+        }*/
+        $post['sign'] = $this->sign($post, '&', $this->SALT);
+        /*$post = json_decode('{
+    "app_id": "tt07e3715e98c9aac0",
+    "out_order_no": "out_order_no_1",
+    "total_amount": 12800,
+    "subject": "测试商品",
+    "body": "测试商品",
+    "valid_time": 180,
+    "sign": "d716027b7b5a91a3319a061d818cc9cc",
+    "cp_extra": "一些附加信息",
+    "notify_url": "https://xxx.com/callback",
+    "disable_msg": 0,
+    "msg_page": "pages/index"
+}');*/
+        $result = json_decode($this->createOrder($post), 1);
+        if ($result['err_no'] ?? 1 != 0)
+            throw new \Exception($result['err_tips'] ?: '字节跳动那边下单失败,未知原因', $result['err_no'] ?? 1);
+        return $result['data'];
     }
-    
-    private function sign($post)
+
+    /*private function sign($post)
     {
 
-        unset($post['risk_info']);
         ksort($post);
         $string = '';
-        foreach ($post as $k => $v) $string .= '&' . $k . '=' . $v;
+        foreach ($post as $k => $v) {
+            if ($k == "other_settle_params" || $k == "app_id" || $k == "sign" || $k == "thirdparty_id") continue;
+            $string .= '&' . $k . '=' . $v;
+        }
         $string = trim($string, '&');
-        return md5($string . $this->secret);
+        return md5($string . $this->SALT);
+    }*/
+
+    private function sign($map, $separator, $addString = '') {
+        $rList = array();
+        foreach($map as $k => $value) {
+            if (in_array($k, ['other_settle_params', 'app_id', 'sign', 'thirdparty_id'])) continue;
+            if ($value === '') continue;
+            array_push($rList, $value);
+        }
+        if (!empty($addString)) array_push($rList, $addString);
+        sort($rList, 2);
+        return md5(implode($separator, $rList));
+    }
+
+    protected function createOrder($post)
+    {
+        $post = json_encode($post);
+        $header = [
+            'Content-Type: application/json; charset=utf-8',
+            'Content-Length:' . strlen($post),
+        ];
+        return HttpHelper::post('https://developer.toutiao.com/api/apps/ecpay/v1/create_order', $post, $header);
     }
 
     public function autoActionFrom()
@@ -204,7 +252,10 @@ class TouTiaoPay implements \xing\payment\core\PayInterface
 
     public function validate($post = null)
     {
-
+        $post['token'] = $this->token;
+        $newArr = [$this->token, $post['timestamp'], $post['nonce'], $post['msg']];
+        $sha1 = sha1(implode('', $newArr));
+        return $sha1 == $post['msg_signature'];
     }
 
     public function refund($reason = '')

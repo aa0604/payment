@@ -80,7 +80,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
      */
     private function yuanToCents($yuan)
     {
-        return intval($yuan * 100);
+        return intval($yuan * 1000 / 10);
     }
 
     /**
@@ -92,7 +92,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
     {
 
         $xml = file_get_contents("php://input");
-        
+
         $input = new \xing\payment\sdk\wechatPay\WxPayResults();
         $input->FromXml($xml);
         return $input->GetValues();
@@ -151,9 +151,10 @@ class WeChatPay implements \xing\payment\core\PayInterface
     public function getAppParam()
     {
         $return = WxPayApi::appUnifiedOrder($this->payObject, 60);
+        $return['timestamp'] = (string) $return['timestamp'];
         return json_encode($return);
     }
-    
+
     public function getMiniProgramParam()
     {
         $this->payObject->SetTrade_type('JSAPI');
@@ -192,8 +193,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
         if (empty($this->notifyRefundUrl)) throw new \Exception('未设置退款通知url');
         $this->payObject->SetNotify_url($this->notifyRefundUrl);
 
-        $intOrderSn = $this->params['intOrderSn'] ?? $this->config['mchId'].date("YmdHis");
-        $input->SetOut_refund_no($this->params['intOrderSn']);
+        $input->SetOut_refund_no($this->orderSn);
         $result = WxPayApi::refund($input);
         return isset($result['return_code']) && $result['return_code'] == 'SUCCESS';
     }

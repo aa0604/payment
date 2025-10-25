@@ -9,6 +9,8 @@
 namespace xing\payment\drive;
 
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use xing\helper\resource\HttpHelper;
 
 /**
@@ -35,6 +37,7 @@ class ApplePay implements \xing\payment\core\PayInterface
     public $sandbox = false; // 沙箱模式
     private $result;
     private $body;
+    private $ch;
 
     public static function init($config)
     {
@@ -97,18 +100,80 @@ class ApplePay implements \xing\payment\core\PayInterface
      * @param bool $sendBox 是否使用沙箱环境
      * @return bool
      */
-    public function validate($post = null)
+    public function validate($post = null, bool $sendBox = false)
     {
-        $receipt = $post['receipt'] ?? null;
-        if (empty($receipt)) throw new \Exception('receipt为空');
+        if (empty($post['receipt'])) throw new \Exception('receipt为空');
 
-        $post = json_encode(["receipt-data" => $receipt, 'password' => $this->config['secret']]);
+        $post = json_encode(["receipt-data" => $post['receipt'], 'password' => $this->config['secret']]);
         $this->result = HttpHelper::post($this->sandbox ? $this->sandboxUrl : $this->url, $post);
         if (empty($this->result)) throw new \Exception('通讯失败');
 
         $return = json_decode($this->result, true);
         if ($return['status'] != 0) $this->setStatusError($return['status']);
         return true;
+    }
+    public function getOrderInfo($post = null, bool $sendBox = false)
+    {
+        $algorithm = 'ES256';
+        $key = $this->config['privateKey'];
+        $payload = [
+            'iss' => $this->config['iss'],
+            'aud' => 'appstoreconnect-v1',  //固定值
+            'iat' => time(),
+            'exp' => time() + 3600,
+            'bid' => $this->config['bundleId'], //应用bundle_id
+        ];
+        $jwt = JWT::encode($payload, $key, $algorithm, $this->config['secretId']);
+        $header = ['Authorization' => 'Bearer ' . $jwt];
+        $url = 'https://api.storekit.itunes.apple.com/inApps/v1/transactions/' . $post['transactionIdentifier'];
+        $sandboxUrl = 'https://api.storekit-sandbox.itunes.apple.com/inApps/v1/transactions/' . $post['transactionIdentifier'];
+
+        // 获取订单信息
+        $isSandbox = !$sendBox ? $this->sandbox : $sendBox;
+        $this->result = $this->get($isSandbox ? $sandboxUrl : $url, $header);
+        $result = json_decode($this->result, 1);
+        if (!empty($result['errorCode'])) {
+            throw new \Exception($result['errorMessage'], $result['errorCode']);
+        }
+        // 解密
+        return static::verifyToken($result['signedTransactionInfo']);
+
+    }
+    /**
+     * 验证token是否有效,默认验证exp,nbf,iat时间
+     * @param string $Token 需要验证的token
+     * @return bool|string
+     */
+    public static function verifyToken($Token)
+    {
+        $tokens = explode('.', $Token);
+        if (count($tokens) != 3)
+            return false;
+
+        list($base64header, $base64payload) = $tokens;
+
+        //获取jwt算法
+        $base64decodeheader = json_decode(self::base64UrlDecode($base64header), JSON_OBJECT_AS_ARRAY);
+        if (empty($base64decodeheader['alg']) || $base64decodeheader['alg'] != 'ES256')
+            return false;
+
+        $payload = json_decode(self::base64UrlDecode($base64payload), JSON_OBJECT_AS_ARRAY);
+
+        return $payload;
+    }
+    /**
+     * base64UrlEncode  https://jwt.io/  中base64UrlEncode解码实现
+     * @param string $input 需要解码的字符串
+     * @return bool|string
+     */
+    private static function base64UrlDecode($input)
+    {
+        $remainder = strlen($input) % 4;
+        if ($remainder) {
+            $addlen = 4 - $remainder;
+            $input .= str_repeat('=', $addlen);
+        }
+        return base64_decode(strtr($input, '-_', '+/'));
     }
     /**
      * 设置状态错误消息
@@ -161,18 +226,33 @@ class ApplePay implements \xing\payment\core\PayInterface
      * @param $url
      * @return mixed
      */
-    private function postData($receipt_data, $password, $url)
+    private function get($url, $header)
     {
-        $postData = ["receipt-data" => $receipt_data, 'password' => $password];
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+//        hr($url);
+
+        $this->ch = curl_init();
+        //SSL证书
+        if (preg_match('/https:/i',$url)){
+            curl_setopt($this->ch,CURLOPT_SSL_VERIFYPEER,false);
+        }
+        curl_setopt($this->ch,CURLOPT_URL, $url);
+        curl_setopt ($this->ch, CURLOPT_TIMEOUT, 30); // 设置超时限制防止死循环
+        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST,'GET'); //设置请求方式
+
+        if ($header) {
+            $httpHeader = array();
+            foreach ($header as $key => $value) {
+                array_push($httpHeader,  is_numeric($key) ? $value : $key.":".$value);
+            }
+            curl_setopt($this->ch, CURLOPT_HTTPHEADER, $httpHeader);
+        }
+        curl_setopt ($this->ch, CURLOPT_RETURNTRANSFER, TRUE); // 获取的信息以文件流的形式
+
+
+        $html = curl_exec($this->ch) ;
+        curl_close($this->ch) ;
+
+        return $html;
     }
 
     public function getResult()
