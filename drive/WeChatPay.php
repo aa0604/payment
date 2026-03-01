@@ -30,6 +30,7 @@ class WeChatPay implements \xing\payment\core\PayInterface
 
     private $config;
     public $payObject;
+    public $notifyRefundUrl;
 
     private $orderSn;
     private $amount;
