@@ -91,7 +91,7 @@ class AliPay implements \xing\payment\core\PayInterface
         $this->params['out_trade_no'] = $outOrderSn;
         $this->params['body'] = $body;
         $this->params['subject'] = $title;
-        $this->params['total_amount'] = number_format($amount, 2);
+        $this->params['total_amount'] = number_format($amount, 2, '.', '');
 //        $this->params['timeout_express'] = '30m';
         return $this;
     }
