@@ -72,7 +72,6 @@ class AliPay implements \xing\payment\core\PayInterface
         $aopClient->alipayrsaPublicKey = $config['alipayrsaPublicKey']; // 请填写支付宝公钥，一行字符串
         $aopClient->signType = $config['signType'] ?? 'RSA2';  // 签名方式
         $aopClient->format = $config['format'] ?? 'JSON';
-        $aopClient->charset = $config['charset'] ?? 'utf-8';
 
         return $aopClient;
     }
